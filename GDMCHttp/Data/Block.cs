@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Text;
 
 namespace GDMCHttp.Data
@@ -32,7 +33,7 @@ namespace GDMCHttp.Data
             if(!Enum.TryParse<BlockName>(baseName, out name))
             {
                 name = BlockName.UNKNOWN;
-                Console.WriteLine(baseName + " is unknown ");
+                Debug.WriteLine(blockName + " is unknown ");
             }
             this.position = position;
         }
