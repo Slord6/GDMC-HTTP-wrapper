@@ -154,8 +154,16 @@ namespace GDMCHttp
                 {
                     return null;
                 }
-                Regex numebrRegex = new Regex("([0-9]{1,})");
-                int[] numbers = numebrRegex.Matches(body).AsQueryable().Cast<string>().Select(numText => int.Parse(numText)).ToArray();
+                Regex numebrRegex = new Regex("(-?[0-9]{1,})");
+
+                MatchCollection matches = numebrRegex.Matches(body);
+                int[] numbers = new int[matches.Count];
+                int i = 0;
+                foreach (Match match in matches)
+                {
+                    numbers[i] = int.Parse(match.Value);
+                    i++;
+                }
 
                 return new Vec3Int[]
                 {
