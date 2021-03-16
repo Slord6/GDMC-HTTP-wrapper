@@ -23,6 +23,11 @@ namespace GDMCHttp.Data.Chunks
         public int[,,] PaletteIndecies { get => paletteIndecies; }
         public Vec3Int WorldPosition { get => worldPosition; }
 
+        /// <summary>
+        /// Create a new chunk Section
+        /// </summary>
+        /// <param name="sectionData">NBT tag to parse</param>
+        /// <param name="worldPosition">Position of the section in the world. Y component is discarded and replaced with parsed value</param>
         public Section(TagCompound sectionData, Vec3Int worldPosition)
         {
             rawData = sectionData;
@@ -32,7 +37,7 @@ namespace GDMCHttp.Data.Chunks
             Tag temp = null;
             temp = null;
             if (actualRoot.TryGetValue("Y", out temp)) ParseY((TagByte)temp, worldPosition);
-            // no concept of 'y'
+            
             this.worldPosition = new Vec3Int(worldPosition.X, y * 16, worldPosition.Z);
 
             temp = null;
@@ -163,7 +168,7 @@ namespace GDMCHttp.Data.Chunks
             int paletteIndex = paletteIndecies[position.Y, position.Z, position.X];
             if(paletteIndex >= palette.Length)
             {
-                return "OOB: " + position + ">> " + worldPosition;
+                return null;
             }
             return palette[paletteIndex];
         }

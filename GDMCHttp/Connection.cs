@@ -106,7 +106,11 @@ namespace GDMCHttp
             }
         }
 
-        public bool SetBlocksSync(Block[] blocks)
+        /// <summary>
+        /// Push the given blocks to the server to be set
+        /// </summary>
+        /// <param name="blocks"></param>
+        public void SetBlocksSync(Block[] blocks)
         {
             using (WebClient webClient = new WebClient())
             {
@@ -114,10 +118,14 @@ namespace GDMCHttp
 
                 string address = $"{BlockEndpoint.AbsoluteUri}?{FormatPositionQuery(blocks[0].Position)}";
                 string result = webClient.UploadString(address, WebRequestMethods.Http.Put, body);
-                return result != "0";
             }
         }
 
+        /// <summary>
+        /// Push the given commands to the server
+        /// </summary>
+        /// <param name="commands">Commands to send</param>
+        /// <returns>Server responses</returns>
         public string[] SendCommandsSync(string[] commands)
         {
             using (WebClient webClient = new WebClient())
@@ -129,6 +137,10 @@ namespace GDMCHttp
             }
         }
 
+        /// <summary>
+        /// Get the build area set on the server
+        /// </summary>
+        /// <returns>Array with two positions representing two corners of a cuboid build area</returns>
         public Vec3Int[] GetBuildArea()
         {
             using (WebClient client = new WebClient())
@@ -153,6 +165,12 @@ namespace GDMCHttp
             }
         }
 
+        /// <summary>
+        /// Translate block positions into offsets from a given point
+        /// </summary>
+        /// <param name="from">The point to offset from</param>
+        /// <param name="blocks">Blocks to calculate offsets for</param>
+        /// <returns>The offsets</returns>
         private Vec3Int[] Offsets(Vec3Int from, Block[] blocks)
         {
             Vec3Int[] offsets = new Vec3Int[blocks.Length];
@@ -164,6 +182,12 @@ namespace GDMCHttp
             return offsets;
         }
 
+        /// <summary>
+        /// Format a set of offsets for pushing to the server
+        /// </summary>
+        /// <param name="offsets">The offsets</param>
+        /// <param name="blocks">Matching blocks to insert block names</param>
+        /// <returns>Offset string</returns>
         private string[] FormatOffsets(Vec3Int[] offsets, Block[] blocks)
         {
             string[] formatted = new string[offsets.Length];
@@ -176,6 +200,13 @@ namespace GDMCHttp
             return formatted;
         }
 
+        /// <summary>
+        /// Get chunks from the server
+        /// </summary>
+        /// <param name="position">Position within the starting chunk</param>
+        /// <param name="dx">Number of chunks in 'x' to get</param>
+        /// <param name="dz">Number of chunks in 'y'</param>
+        /// <returns>Chunks</returns>
         public Chunk[] GetChunksSync(Vec3Int position, int dx = 1, int dz = 1)
         {
             // Get "chunck coordinate"

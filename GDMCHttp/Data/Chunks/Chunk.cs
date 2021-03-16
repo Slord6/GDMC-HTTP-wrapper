@@ -43,6 +43,11 @@ namespace GDMCHttp.Data.Chunks
             return new Vec3Int(chunkPosition.X * 16, 0, chunkPosition.Z * 16);
         }
 
+        /// <summary>
+        /// Parse NBT data into Chunk objects
+        /// </summary>
+        /// <param name="rawNbtData">NBT data</param>
+        /// <returns>Chunks</returns>
         public static Chunk[] ParseToChunks(byte[] rawNbtData)
         {
             NbtDocument document = Chunk.ParseToDoc(rawNbtData);
@@ -50,6 +55,11 @@ namespace GDMCHttp.Data.Chunks
             return LevelsToChunks(chunkLevels);
         }
 
+        /// <summary>
+        /// Given a Level NBT tag, parse out a Chunk
+        /// </summary>
+        /// <param name="levels">The Level tags</param>
+        /// <returns>Chunks</returns>
         private static Chunk[] LevelsToChunks(TagCompound[] levels)
         {
             Chunk[] chunks = new Chunk[levels.Length];
@@ -65,6 +75,11 @@ namespace GDMCHttp.Data.Chunks
             return chunks;
         }
 
+        /// <summary>
+        /// Extract the x and z components of a Level tag   
+        /// </summary>
+        /// <param name="level"></param>
+        /// <returns>Vec3Int with X and Z components matching that of the Level, Y is always 0</returns>
         private static Vec3Int LevelPosition(TagCompound level)
         {
             int x = level.GetInt("xPos").Value;
@@ -72,7 +87,13 @@ namespace GDMCHttp.Data.Chunks
             return new Vec3Int(x, 0, z);
         }
 
-        private static Section[] LevelToSections(TagCompound level, Vec3Int chunkPosition)
+        /// <summary>
+        /// Parse out the Sections from a Level NBT tag
+        /// </summary>
+        /// <param name="level">The Level NBT tag</param>
+        /// <param name="chunkWorldPosition">The position of the chunk in the world</param>
+        /// <returns>Sections</returns>
+        private static Section[] LevelToSections(TagCompound level, Vec3Int chunkWorldPosition)
         {
             TagDictionary levelChildren = level.Value;
 
@@ -84,12 +105,17 @@ namespace GDMCHttp.Data.Chunks
             int index = 0;
             foreach (TagCompound section in sectionsTagList.Value)
             {
-                sections[index] = new Section(section, chunkPosition);
+                sections[index] = new Section(section, chunkWorldPosition);
                 index++;
             }
             return sections;
         }
 
+        /// <summary>
+        /// Read raw bytes into an NbtDocument
+        /// </summary>
+        /// <param name="rawData">The raw NBT bytes</param>
+        /// <returns>An NbtDocument</returns>
         private static NbtDocument ParseToDoc(byte[] rawData)
         {
             BinaryTagReader reader = new BinaryTagReader(new MemoryStream(rawData), true);
@@ -99,6 +125,11 @@ namespace GDMCHttp.Data.Chunks
             return new NbtDocument(root);
         } 
 
+        /// <summary>
+        /// Parse out Levels from an NbtDocument
+        /// </summary>
+        /// <param name="doc">The document to parse</param>
+        /// <returns>Level NBT tags</returns>
         private static TagCompound[] ExtractChunkLevels(NbtDocument doc)
         {
             TagList chunkList = doc.Query<TagList>("Chunks");
@@ -115,6 +146,11 @@ namespace GDMCHttp.Data.Chunks
             return levels;
         }
 
+        /// <summary>
+        /// Given a world position translate into a chunk position
+        /// </summary>
+        /// <param name="position">Position in the world</param>
+        /// <returns>Equivalent chunk position</returns>
         public static Vec3Int ToChunkCoords(Vec3Int position)
         {
             return new Vec3Int((int)Math.Floor(position.X / 16.0), position.Y, (int)Math.Floor(position.Z / 16.0));
