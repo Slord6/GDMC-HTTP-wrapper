@@ -21,6 +21,10 @@ namespace GDMCHttp.Data.Chunks
                 return Chunk.ChunkToWorldPosition(chunkPosition);
             }
         }
+        /// <summary>
+        /// Position in "chunk coordinates"
+        /// </summary>
+        public Vec3Int ChunkPosition { get => chunkPosition; }
         public TagCompound Root { get => root; }
 
         /// <summary>
@@ -36,7 +40,7 @@ namespace GDMCHttp.Data.Chunks
 
         public static Vec3Int ChunkToWorldPosition(Vec3Int chunkPosition)
         {
-            return new Vec3Int(chunkPosition.X * 16, 0, chunkPosition.Y * 16);
+            return new Vec3Int(chunkPosition.X * 16, 0, chunkPosition.Z * 16);
         }
 
         public static Chunk[] ParseToChunks(byte[] rawNbtData)
