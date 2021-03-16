@@ -1,6 +1,7 @@
 ﻿using Cyotek.Data.Nbt;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Text;
 
@@ -70,8 +71,9 @@ namespace GDMCHttp.Data.Chunks
         private void ParseBlockStates(TagLongArray rawBlockStates)
         {
             blockStates = rawBlockStates.Value;
+            int bitsPerBlock = Math.Max(4, (int)Math.Ceiling(Math.Log(palette.Length, 2)));
 
-            paletteIndecies = ReadBlockStates(blockStates);
+            paletteIndecies = ReadBlockStates(blockStates, bitsPerBlock);
         }
 
         private void ParseSkyLight(TagByteArray rawSkyLight)
@@ -84,78 +86,64 @@ namespace GDMCHttp.Data.Chunks
             return palette == null || blockStates == null;
         }
 
-        /**
-	     * Obtain a list of BlockState indices from the BlockState long array.
-	     * @param longArray Long array to parse.
-	     * @return Indices of BlockStates in the palette.
-         * SOURCE: https://github.com/Sam54123/Scaffold/blob/3972661986f84737876567c9aa4c419b2b0fcf4a/scaffold-nbt/src/main/java/org/scaffoldeditor/nbt/io/ChunkParser.java#L316
-         * MIT License
-            Copyright (c) 2019 Sam Bradley
-
-            Permission is hereby granted, free of charge, to any person obtaining a copy
-            of this software and associated documentation files (the "Software"), to deal
-            in the Software without restriction, including without limitation the rights
-            to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-            copies of the Software, and to permit persons to whom the Software is
-            furnished to do so, subject to the following conditions:
-
-            The above copyright notice and this permission notice shall be included in all
-            copies or substantial portions of the Software.
-
-            THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-            IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-            FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-            AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-            LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-            OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-            SOFTWARE.
-	     */
-        private int[,,] ReadBlockStates(long[] longArray)
+        /// <summary>
+        /// Obtain a list of BlockState indices from the BlockState long array.
+        /// </summary>
+        /// <param name="longArray">The blockstate array</param>
+        /// <param name="bitsPerBlock">The number of bits in each compressed block</param>
+        /// <returns>Array of palette indicied in a 16x16x16 array</returns>
+        private int[,,] ReadBlockStates(long[] longArray, int bitsPerBlock)
         {
-
-            /*
-             * The size of an index in bits.
-             * One section always stores 16*16*16 = 4096 blocks,
-             * therefore the amount of bits per block can be calculated like that: 
-             * size of BlockStates-Tag * 64 / 4096 (64 = bit of a long value),
-             * which simplifies to longArrayLength/64. 
-             */
-            int indexSize = Math.Max(4, longArray.Length / 64);
-            long maxEntryValue = (1L << indexSize) - 1;
-
-            // Convert into int array.
-            int[,,] indices = new int[16, 16, 16];
-
-            for (int y = 0; y < 16; y++)
+            /// Based on code from https://github.com/nilsgawlik/gdmc_http_client_python/blob/375b1839160a69466685b765c3a187607d5b3ea2/bitarray.py#L18
+            /// MIT License
+            /// Copyright (c) 2020-2021 Nils Gawlik
+            /// Copyright (c) 2021 Blinkenlights
+            /// 
+            /// Permission is hereby granted, free of charge, to any person obtaining a copy
+            /// of this software and associated documentation files (the "Software"), to deal
+            /// in the Software without restriction, including without limitation the rights
+            /// to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+            /// copies of the Software, and to permit persons to whom the Software is
+            /// furnished to do so, subject to the following conditions:
+            /// 
+            /// The above copyright notice and this permission notice shall be included in all
+            /// copies or substantial portions of the Software.
+            /// 
+            /// THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+            /// IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+            /// FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+            /// AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+            /// LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+            /// OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+            /// SOFTWARE.
+            
+            int arraySize = 16 * 16 * 16;
+            int maxEntryValue = (1 << bitsPerBlock) - 1;
+            int entriesPerLong = (int)Math.Floor(64 / (double)bitsPerBlock);
+            int calculatedLength = (int)Math.Floor((double)(arraySize + entriesPerLong - 1) / entriesPerLong);
+            
+            if (longArray.Length != calculatedLength)
             {
-                for (int z = 0; z < 16; z++)
+                throw new ArgumentException($"Invalid length given for storage, got {longArray.Length} but expected {calculatedLength}");
+            }
+
+            int[,,] indicies = new int[16, 16, 16];
+            for (int x = 0; x < 16; x++)
+            {
+                for (int y = 0; y < 16; y++)
                 {
-                    for (int x = 0; x < 16; x++)
+                    for (int z = 0; z < 16; z++)
                     {
-                        int arrayIndex = y << 8 | z << 4 | x;
-                        int bitIndex = arrayIndex * indexSize;
-                        int startIndex = bitIndex / 64;
-                        int endIndex = ((arrayIndex + 1) * indexSize - 1) / 64;
-                        int startBitSubIndex = bitIndex % 64;
-
-                        int val;
-
-                        if (startIndex == endIndex)
-                        {
-                            val = (int)((ulong)longArray[startIndex] >> startBitSubIndex & (ulong)maxEntryValue);
-                        }
-                        else
-                        {
-                            int endBitSubIndex = 64 - startBitSubIndex;
-                            val = (int)(((ulong)longArray[startIndex] >> startBitSubIndex | (ulong)longArray[endIndex] << endBitSubIndex) & (ulong)maxEntryValue);
-                        }
-
-                        indices[y, z, x] = val;
+                        int index1D = y * 16 * 16 + z * 16 + x;
+                        int indexOfLong = (int)(index1D / entriesPerLong);
+                        long currentLong = longArray[indexOfLong];
+                        int k = (index1D - indexOfLong * entriesPerLong) * bitsPerBlock;
+                        indicies[y, z, x] = (int)(currentLong >> k & maxEntryValue);
                     }
                 }
             }
 
-            return indices;
+            return indicies;
         }
 
         /// <summary>
@@ -177,6 +165,9 @@ namespace GDMCHttp.Data.Chunks
         {
             List<Block> blocks = new List<Block>();
             if (isEmpty()) return blocks;
+
+            // TODO change this to run through the palette and get the position from that
+            // Allows no blockName == null check
             for (int y = 0; y < 16; y++)
             {
                 for (int z = 0; z < 16; z++)
@@ -184,7 +175,13 @@ namespace GDMCHttp.Data.Chunks
                     for (int x = 0; x < 16; x++)
                     {
                         Vec3Int pos = new Vec3Int(worldPosition.X + x, worldPosition.Y + y, worldPosition.Z + z);
-                        blocks.Add(new Block(BlockAt(new Vec3Int(x, y, z)), pos));
+                        string blockName = BlockAt(new Vec3Int(x, y, z));
+                        if(blockName == null)
+                        {
+                            //Debug.WriteLine($"No block at {pos} (section offset {new Vec3Int(x, y, z)}). Section y is {Y}, world pos {worldPosition}");
+                            continue;
+                        }
+                        blocks.Add(new Block(blockName, pos));
 
                     }
                 }
