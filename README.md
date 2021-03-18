@@ -7,7 +7,7 @@ The library is simple, functional and usable but does little error checking. It 
 
 ## Usage
 
-The API is covers all endpoints supported by the server as of 16/30/20. All methods are synchronous.
+The API covers all endpoints supported by the server as of 16/30/20. All methods are synchronous.
 
 ### Examples
 ``` C#
