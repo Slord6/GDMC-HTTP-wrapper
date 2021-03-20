@@ -185,7 +185,7 @@ namespace GDMCHttp
             for (int i = 0; i < blocks.Length; i++)
             {
                 Vec3Int blockPos = blocks[i].Position;
-                offsets[i] = new Vec3Int(from.X - blockPos.X, from.Y - blockPos.Y, from.Z - blockPos.Z);
+                offsets[i] = new Vec3Int(blockPos.X - from.X, blockPos.Y - from.Y, blockPos.Z - from.Z);
             }
             return offsets;
         }
