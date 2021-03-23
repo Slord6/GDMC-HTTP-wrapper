@@ -90,5 +90,10 @@ namespace GDMCHttp.Data
             if (a == max) return b;
             return a;
         }
+
+        public static Vec3Int Offset(Vec3Int root, Vec3Int offset)
+        {
+            return new Vec3Int(root.x + offset.x, root.y + offset.y, root.z + offset.z);
+        }
     }
 }

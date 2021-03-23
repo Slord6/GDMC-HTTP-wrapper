@@ -2,16 +2,18 @@
 using Cyotek.Data.Nbt.Serialization;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Text;
 
 namespace GDMCHttp.Data.Chunks
 {
     public class Chunk
     {
-        private TagCompound root;
         private Vec3Int chunkPosition;
         private Section[] sections;
+        private Dictionary<HeightmapTypes, Block[,]> heightmaps;
 
         public Section[] Sections { get => sections; }
         public Vec3Int WorldPosition
@@ -25,22 +27,56 @@ namespace GDMCHttp.Data.Chunks
         /// Position in "chunk coordinates"
         /// </summary>
         public Vec3Int ChunkPosition { get => chunkPosition; }
-        public TagCompound Root { get => root; }
+        public Dictionary<HeightmapTypes, Block[,]> Heightmaps { get => heightmaps; }
 
         /// <summary>
         /// 
         /// </summary>
         /// <param name="sections"></param>
         /// <param name="chunkPosition">Chunk position, ie normalposition/16</param>
-        public Chunk(Section[] sections, Vec3Int chunkPosition)
+        /// <param name="rawHeightmaps">Heightmaps, indexed by HeightmapNames value</param>
+        public Chunk(Section[] sections, Vec3Int chunkPosition, Dictionary<HeightmapTypes, int[,]> rawHeightmaps)
         {
             this.sections = sections;
             this.chunkPosition = chunkPosition;
+            this.rawHeightmaps = rawHeightmaps;
+            heightmaps = new Dictionary<HeightmapTypes, Block[,]>();
+            foreach (KeyValuePair<HeightmapTypes, int[,]> heightmapPair in rawHeightmaps)
+            {
+                heightmaps.Add(heightmapPair.Key, BlockHeightmap(heightmapPair.Value));
+            }
         }
 
         public static Vec3Int ChunkToWorldPosition(Vec3Int chunkPosition)
         {
             return new Vec3Int(chunkPosition.X * 16, 0, chunkPosition.Z * 16);
+        }
+
+        public Block[,] BlockHeightmap(int[,] rawHeightmap)
+        {
+            int chunkSideLen = 16;
+            Block[,] blocks = new Block[chunkSideLen, chunkSideLen];
+            for (int x = 0; x < chunkSideLen; x++)
+            {
+                for (int z = 0; z < chunkSideLen; z++)
+                {
+                    int y = rawHeightmap[x, z];
+                    Block block;
+                    foreach (Section section in sections)
+                    {
+                        // offset from world position height to get y between 0 and 15
+                        // -1 as minecraft gives position of air block above
+                        int offsetY = y - section.WorldPosition.Y - 1;
+                        Vec3Int pos = new Vec3Int(x, offsetY, z);
+                        block = section.BlockAt(pos);
+                        if (block == null) continue;
+
+                        blocks[x, z] = block;
+                        break;
+                    }
+                }
+            }
+            return blocks;
         }
 
         /// <summary>
@@ -70,9 +106,33 @@ namespace GDMCHttp.Data.Chunks
 
                 Vec3Int chunkPosition = LevelPosition(level);
                 Section[] sections = LevelToSections(level, Chunk.ChunkToWorldPosition(chunkPosition));
-                chunks[i] = new Chunk(sections, chunkPosition);
+
+                Tag heightmapTag;
+                level.Value.TryGetValue("Heightmaps", out heightmapTag);
+                Dictionary<HeightmapTypes, int[,]> rawHeightmaps = GetRawHeightmaps((TagCompound)heightmapTag); 
+                chunks[i] = new Chunk(sections, chunkPosition, rawHeightmaps);
             }
             return chunks;
+        }
+
+        private static Dictionary<HeightmapTypes, int[,]> GetRawHeightmaps(TagCompound heightmapTag)
+        {
+            TagDictionary heightmaps = heightmapTag.Value;
+            HeightmapTypes[] heightmapTypes = Enum.GetValues(typeof(HeightmapTypes)).Cast<HeightmapTypes>().ToArray();
+            Dictionary<HeightmapTypes, int[,]> parsedHeightmaps = new Dictionary<HeightmapTypes, int[,]>();
+            for (int i = 0; i < heightmapTypes.Length; i++)
+            {
+                Tag temp = null;
+                if (!heightmaps.TryGetValue(heightmapTypes[i].ToString(), out temp))
+                {
+                    Debug.WriteLine($"No {heightmapTypes[i]} heightmap in chunk - {heightmapTag.ToString()}");
+                    continue;
+                }
+                TagLongArray sectionsTagList = (TagLongArray)temp;
+                int[,] heightmapIndicies = BitArray.ParseHeightMap(sectionsTagList.Value);
+                parsedHeightmaps.Add(heightmapTypes[i], heightmapIndicies);
+            }
+            return parsedHeightmaps;
         }
 
         /// <summary>

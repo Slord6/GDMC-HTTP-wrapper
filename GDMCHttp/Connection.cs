@@ -150,7 +150,7 @@ namespace GDMCHttp
                 {
                     body = client.DownloadString(new Uri(BuildAreaEndpoint.AbsoluteUri));
                 }
-                catch(WebException ex)
+                catch(WebException)
                 {
                     return null;
                 }
