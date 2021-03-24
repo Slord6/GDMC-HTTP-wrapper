@@ -39,7 +39,6 @@ namespace GDMCHttp.Data.Chunks
         {
             this.sections = sections;
             this.chunkPosition = chunkPosition;
-            this.rawHeightmaps = rawHeightmaps;
             heightmaps = new Dictionary<HeightmapTypes, Block[,]>();
             foreach (KeyValuePair<HeightmapTypes, int[,]> heightmapPair in rawHeightmaps)
             {

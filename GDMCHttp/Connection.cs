@@ -101,7 +101,9 @@ namespace GDMCHttp
             using (WebClient webClient = new WebClient())
             {
                 string address = $"{BlockEndpoint.AbsoluteUri}?{FormatPositionQuery(block.Position)}";
-                string result = webClient.UploadString(address, WebRequestMethods.Http.Put, block.NamespacedName);
+                string blockData = block.NamespacedName;
+                if (block.Properties != null) blockData += block.Properties.ToString();
+                string result = webClient.UploadString(address, WebRequestMethods.Http.Put, blockData);
                 return result != "0";
             }
         }
@@ -203,7 +205,12 @@ namespace GDMCHttp
             {
                 Vec3Int offset = offsets[i];
                 string blockname = blocks[i].NamespacedName;
-                formatted[i] = $"~{offset.X} ~{offset.Y} ~{offset.Z} {blockname}";
+                string properites = "";
+                if (blocks[i].Properties != null) {
+                    properites = blocks[i].Properties.ToString();
+                }
+
+                formatted[i] = $"~{offset.X} ~{offset.Y} ~{offset.Z} {blockname}{properites}";
             }
             return formatted;
         }

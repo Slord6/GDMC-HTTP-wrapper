@@ -11,14 +11,14 @@ namespace GDMCHttp.Data.Chunks
     {
         private TagCompound rawData;
         private int y = -1;
-        private string[] palette = null;
+        private BlockProperties[] palette = null;
         private long[] blockStates = null;
         private byte[] skyLight = null;
         private int[,,] paletteIndecies = null;
         private Vec3Int worldPosition;
 
         public int Y { get => y; }
-        public string[] Palette { get => palette.ToArray(); }
+        public BlockProperties[] Palette { get => palette.ToArray(); }
         public long[] BlockStates { get => blockStates.ToArray(); }
         public byte[] SkyLight { get => skyLight.ToArray(); }
         public int[,,] PaletteIndecies { get => paletteIndecies; }
@@ -59,11 +59,11 @@ namespace GDMCHttp.Data.Chunks
 
         private void ParsePalette(TagList rawPalette)
         {
-            palette = new string[rawPalette.Value.Count];
+            palette = new BlockProperties[rawPalette.Value.Count];
             int index = 0;
             foreach (TagCompound paletteItem in rawPalette.Value)
             {
-                palette[index] = paletteItem.GetString("Name").Value;
+                palette[index] = new BlockProperties(paletteItem);
                 index++;
             }
         }
