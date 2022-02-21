@@ -5,9 +5,13 @@
 
 The library is simple, functional and usable but does little error checking. It is probably 'good enough' for most uses (but PRs welcome when it isn't)!
 
+## GDMC HTTP Server Supported Versions
+
+- [v0.4.2](https://github.com/nilsgawlik/gdmc_http_interface/releases/tag/v0.4.2)
+
 ## Usage
 
-The API covers all endpoints supported by the server as of 16/30/20. All methods are synchronous.
+All methods are synchronous.
 
 ### Examples
 ``` C#
