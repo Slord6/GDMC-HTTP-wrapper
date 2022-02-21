@@ -1,14 +1,7 @@
-﻿using Cyotek.Data.Nbt;
-using Cyotek.Data.Nbt.Serialization;
-using GDMCHttp.Data;
+﻿using GDMCHttp.Data;
 using GDMCHttp.Data.Chunks;
 using System;
-using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
-using System.Linq;
 using System.Net;
-using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 
 namespace GDMCHttp
@@ -86,8 +79,9 @@ namespace GDMCHttp
             using(WebClient client = new WebClient())
             {
                 string query = "?" + FormatPositionQuery(position);
-                string name = client.DownloadString(new Uri(BlockEndpoint.AbsoluteUri + query));
-                return new Block(name, position);
+                query += "&includeState=true";
+                string nameAndProperties = client.DownloadString(new Uri(BlockEndpoint.AbsoluteUri + query));
+                return new Block(new BlockProperties(nameAndProperties), position);
             }
         }
 
@@ -101,8 +95,7 @@ namespace GDMCHttp
             using (WebClient webClient = new WebClient())
             {
                 string address = $"{BlockEndpoint.AbsoluteUri}?{FormatPositionQuery(block.Position)}";
-                string blockData = block.NamespacedName;
-                if (block.Properties != null) blockData += block.Properties.ToString();
+                string blockData = block.ToString();
                 string result = webClient.UploadString(address, WebRequestMethods.Http.Put, blockData);
                 return result != "0";
             }
@@ -117,7 +110,6 @@ namespace GDMCHttp
             using (WebClient webClient = new WebClient())
             {
                 string body = String.Join("\n", FormatOffsets(Offsets(blocks[0].Position, blocks), blocks));
-
                 string address = $"{BlockEndpoint.AbsoluteUri}?{FormatPositionQuery(blocks[0].Position)}";
                 string result = webClient.UploadString(address, WebRequestMethods.Http.Put, body);
             }
@@ -143,7 +135,7 @@ namespace GDMCHttp
         /// Get the build area set on the server
         /// </summary>
         /// <returns>Array with two positions representing two corners of a cuboid build area</returns>
-        public Vec3Int[] GetBuildArea()
+        public Vec3Int[] GetBuildAreaSync()
         {
             using (WebClient client = new WebClient())
             {
@@ -204,13 +196,7 @@ namespace GDMCHttp
             for (int i = 0; i < offsets.Length; i++)
             {
                 Vec3Int offset = offsets[i];
-                string blockname = blocks[i].NamespacedName;
-                string properites = "";
-                if (blocks[i].Properties != null) {
-                    properites = blocks[i].Properties.ToString();
-                }
-
-                formatted[i] = $"~{offset.X} ~{offset.Y} ~{offset.Z} {blockname}{properites}";
+                formatted[i] = $"~{offset.X} ~{offset.Y} ~{offset.Z} {blocks[i].ToString()}";
             }
             return formatted;
         }

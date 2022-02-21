@@ -14,6 +14,9 @@ namespace GDMCHttp.Data
 
         public Vec3Int Position { get => position; }
         public BlockName Name { get => name; }
+        /// <summary>
+        /// The fully qualified blockname, with leading "minecraft:"
+        /// </summary>
         public string NamespacedName { get => $"minecraft:{Name}"; }
         public BlockProperties Properties { get => properties; }
 
@@ -55,6 +58,17 @@ namespace GDMCHttp.Data
                 name = BlockName.UNKNOWN;
                 Debug.WriteLine(fullName + " is unknown ");
             }
+        }
+
+        public override string ToString()
+        {
+            string fullName = NamespacedName;
+            if(Properties != null)
+            {
+                fullName += Properties.ToString();
+            }
+
+            return fullName;
         }
     }
 }
