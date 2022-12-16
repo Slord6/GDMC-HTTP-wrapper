@@ -73,7 +73,7 @@ namespace GDMCHttp
                 query += "&includeState=true";
                 query += "&includeData=true";
                 string blockData = client.DownloadString(new Uri(BlockEndpoint.AbsoluteUri + query));
-                return new Block(new BlockProperties(blockData), position);
+                return new Block(blockData);
             }
         }
 

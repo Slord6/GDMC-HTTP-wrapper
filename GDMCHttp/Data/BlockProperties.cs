@@ -3,63 +3,77 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
+using System.Text.RegularExpressions;
 
 namespace GDMCHttp.Data
 {
     public class BlockProperties
     {
-        private string name;
+        private BlockName name;
+        private Vec3Int position;
         private Dictionary<BlockProperty, string> properties;
-        private Tags tags;
+        private Dictionary<string, string> blockStates;
 
-        public string Name { get => name; }
+        public BlockName Name { get => name; }
+        public Vec3Int Position { get => position; }
+        public string NamespacedName { get => "minecraft:" + name.ToString(); }
         public Dictionary<BlockProperty, string> Properties { get => properties; }
+        private Dictionary<string, string> BlockStates { get => blockStates; }
 
-        public BlockProperties(BlockName name, Dictionary<BlockProperty, string> properties)
-        {
-            this.name = "minecraft:" + name.ToString();
-            this.properties = properties;
-            this.tags = new Tags();
-        }
-
-        public BlockProperties(string name, Dictionary<BlockProperty, string> properties)
+        public BlockProperties(BlockName name, Dictionary<BlockProperty, string> properties, Dictionary<string, string> blockStates, Vec3Int position)
         {
             this.name = name;
             this.properties = properties;
-            this.tags = new Tags();
+            this.blockStates = blockStates;
+            this.position = position;
         }
 
-        public BlockProperties(string nameWithProperties)
+        public BlockProperties(BlockName name, Vec3Int position) : this(name, new Dictionary<BlockProperty, string>(), new Dictionary<string, string>(), position)
         {
-            string[] sections = nameWithProperties.Split(new char[] { '[' });
-            name = sections[0];
-            properties = PropertiesFromString(sections[1]);
         }
 
-        public BlockProperties(TagCompound blockData)
+        /// <summary>
+        /// Construct a BlockProperties from a raw string
+        /// </summary>
+        /// <param name="rawString">String of the format namespaced:name[property=value,property2=value2]{blockstate: {value}}</param>
+        public BlockProperties(string rawString)
         {
-            name = blockData.GetString("Name").Value;
-            properties = new Dictionary<BlockProperty, string>();
+            Regex regex = new Regex(@"(\d*) (\d*) (\d*) (minecraft:(\w*))\[(.*)]({.*})");
+            Match match = regex.Match(rawString);
+            // 0 = whole match
+            // 1,2,3 = x,y,z
+            string positionString = $"{match.Groups[1].Value} {match.Groups[2].Value} {match.Groups[3].Value}";
+            Vec3Int position = Vec3Int.Parse(positionString);
+            this.position = position;
+            // 4= minecraft:block, 5 = block
+            SetName(match.Groups[4].Value);
+            // 6 = property=value,property2=value2...
+            string propertiesString = match.Groups[6].Value;
+            this.properties = PropertiesFromString(propertiesString);
+            // 7 = blockstates
+            string blockstates = match.Groups[7].Value;
+            this.blockStates = new Dictionary<string, string>();
+        }
 
-            TagCompound propertiesTag = blockData.GetCompound("Properties");
-            if (propertiesTag == null) return;
+        /// <summary>
+        /// Set the name of this block
+        /// </summary>
+        /// <param name="fullName">Full block name eg. minecraft:oak_planks</param>
+        private void SetName(string fullName)
+        {
+            string baseName = fullName.Split(':')[1];
 
-            foreach (Tag property in propertiesTag.Value)
+            if (!Enum.TryParse<BlockName>(baseName, out name))
             {
-                TagString prop = (TagString)property;
-
-                BlockProperty parsedProperty;
-                if (Enum.TryParse<BlockProperty>(prop.Name, out parsedProperty))
-                {
-                    properties.Add(parsedProperty, prop.Value);
-                }
+                name = BlockName.UNKNOWN;
+                Debug.WriteLine(fullName + " is unknown ");
             }
         }
 
         private Dictionary<BlockProperty, string> PropertiesFromString(string propertyString)
         {
             propertyString = propertyString.Replace("[", "").Replace("]", "");
-            string[] pairs = propertyString.Split(new char[] { ',' });
+            string[] pairs = propertyString.Split(new char[] { ',' }, StringSplitOptions.RemoveEmptyEntries);
 
             Dictionary<BlockProperty, string> parsedPairs = new Dictionary<BlockProperty, string>();
             for (int i = 0; i < pairs.Length; i++)

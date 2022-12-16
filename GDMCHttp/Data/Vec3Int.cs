@@ -95,5 +95,37 @@ namespace GDMCHttp.Data
         {
             return new Vec3Int(root.x + offset.x, root.y + offset.y, root.z + offset.z);
         }
+
+        public static bool TryParse(string value, out Vec3Int position)
+        {
+            position = null;
+            try
+            {
+                value = value.Replace(",", " ");
+                string[] values = value.Split(' ');
+                if (values.Length < 3) return false;
+                int[] intValues = new int[3];
+                for (int i = 0; i < 3; i++)
+                {
+                    intValues[i] = int.Parse(values[i]);
+                }
+                position = new Vec3Int(intValues[0], intValues[1], intValues[2]);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public static Vec3Int Parse(string value)
+        {
+            Vec3Int position;
+            if(!TryParse(value, out position))
+            {
+                throw new ArgumentException(value + " is not a valid Vec3Int representation");
+            }
+            return position;
+        }
     }
 }
