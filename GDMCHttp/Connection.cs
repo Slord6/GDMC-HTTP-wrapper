@@ -9,6 +9,7 @@ namespace GDMCHttp
     public class Connection
     {
         private static string blockEndpoint = "/blocks";
+        private static string biomeEndpoint = "/biomes";
         private static string commandsEndpoint = "/command";
         private static string buildAreaEndpoint = "/buildarea";
         private Uri root;
@@ -21,6 +22,17 @@ namespace GDMCHttp
             get
             {
                 return new Uri(root, blockEndpoint);
+            }
+        }
+
+        /// <summary>
+        /// Endpoint for getting the biome for positions
+        /// </summary>
+        private Uri BiomeEndpoint
+        {
+            get
+            {
+                return new Uri(root, biomeEndpoint);
             }
         }
 
@@ -55,9 +67,10 @@ namespace GDMCHttp
         /// </summary>
         /// <param name="position">Position to transform</param>
         /// <returns>Query parmater string</returns>
-        private string FormatPositionQuery(Vec3Int position)
+        private string FormatPositionQuery(Vec3Int position, bool isOffset = false)
         {
-            return $"x={position.X}&y={position.Y}&z={position.Z}";
+            string d = isOffset ? "d" : "";
+            return $"{d}x={position.X}&{d}y={position.Y}&{d}z={position.Z}";
         }
 
         /// <summary>
@@ -67,7 +80,7 @@ namespace GDMCHttp
         /// <returns>The Block data</returns>
         public Block GetBlockSync(Vec3Int position)
         {
-            using(WebClient client = new WebClient())
+            using (WebClient client = new WebClient())
             {
                 string query = "?" + FormatPositionQuery(position);
                 query += "&includeState=true";
@@ -105,6 +118,43 @@ namespace GDMCHttp
                 string address = $"{BlockEndpoint.AbsoluteUri}?{FormatPositionQuery(blocks[0].Position)}";
                 string result = webClient.UploadString(address, WebRequestMethods.Http.Put, body);
             }
+        }
+
+        /// <summary>
+        /// Syncronously get the biome for a single block
+        /// </summary>
+        /// <param name="position">The starting point for the query</param>
+        /// <param name="offsetRange">The offset from the start point to get data up to</param>
+        /// <returns>The Biome data</returns>
+        public BiomePoint[] GetBiomesSync(Vec3Int position, Vec3Int offsetRange)
+        {
+            using (WebClient client = new WebClient())
+            {
+                string query = "?" + FormatPositionQuery(position);
+                if (offsetRange != new Vec3Int(1, 1, 1))
+                {
+                    query += "&" + FormatPositionQuery(offsetRange, true);
+                }
+                string biomeData = client.DownloadString(new Uri(BiomeEndpoint.AbsoluteUri + query));
+
+                string[] biomePointStrings = biomeData.Split('\n');
+                BiomePoint[] biomePoints = new BiomePoint[biomePointStrings.Length];
+                for (int i = 0; i < biomePointStrings.Length; i++)
+                {
+                    biomePoints[i] = new BiomePoint(biomePointStrings[i]);
+                }
+                return biomePoints;
+            }
+        }
+
+        /// <summary>
+        /// Get biome data at a position
+        /// </summary>
+        /// <param name="position">The position to check</param>
+        /// <returns>The BiomePoint for that position</returns>
+        public BiomePoint GetBiomeSync(Vec3Int position)
+        {
+            return GetBiomesSync(position, new Vec3Int(1, 1, 1))[0];
         }
 
         /// <summary>
