@@ -1,5 +1,5 @@
 # GDMC-HTTP-wrapper
- C# library to interface with the [http server](https://github.com/nilsgawlik/gdmc_http_interface) for the [GDMC](http://gendesignmc.engineering.nyu.edu/) competition
+ C# library to interface with the [http server](https://github.com/Niels-NTG/gdmc_http_interface) for the [GDMC](http://gendesignmc.engineering.nyu.edu/) competition
 
 ## Library State
 
@@ -7,7 +7,13 @@ The library is simple, functional and usable but does little error checking. It 
 
 ## GDMC HTTP Server Supported Versions
 
-- [v0.4.2](https://github.com/nilsgawlik/gdmc_http_interface/releases/tag/v0.4.2)
+- [v0.6.2](https://github.com/Niels-NTG/gdmc_http_interface/releases/tag/v0.6.2)
+
+## Limitations
+
+For simplicity this client no longer support the `/chunks` endpoint.
+
+This client does not support the `dimension` query parameter on any requests yet.
 
 ## Usage
 
@@ -15,36 +21,29 @@ All methods are synchronous.
 
 ### Examples
 ``` C#
-Connection connection = new Connection();
-Vec3Int point = new Vec3Int(20, 64, 15);
-// Get 3x3 chunk area starting from the chunk containing 20, 64, 15
-Chunk[] chunks = connection.GetChunksSync(point, 3, 3);
+using GDMCHttp;
+using GDMCHttp.Commands;
+using GDMCHttp.Data;
 
-// Get an individual block
-Block block = connection.GetBlockSync(point);
-
-// Send commands to the server
-string[] returns = connection.SendCommandsSync(new string[]
-        {
-            "say hello!",
-            "data get entity @p Pos"
-        });
-
-// Set a block on the server
-Block goldBlock = new Block(new Vec3Int(0, 70, 0), BlockName.gold_block);
-bool blockChanged = SetBlockSync(Block block)
-
-// Create some blocks and then push them to the server
-List<Block> blocks = new List<Block>(30);
-for (int x = 0; x < 10; x++)
+Func<string, Connection, string> announce = (string msg, Connection connection) =>
 {
-    for (int z = 0; z < 3; z++)
+    return connection.SendCommandSync(new Say(msg));
+};
+
+Connection connection = new Connection();
+announce("Client connected", connection);
+
+for (int y = 65; y < 70; y++)
+{
+    for (int x = 0; x < 5; x++)
     {
-        blocks.Add(new Block(new Vec3Int(x, 70, z), BlockName.gold_block));
+        Block b = connection.GetBlockSync(new Vec3Int(x, y, 0));
+        Console.WriteLine(b.ToString());
     }
 }
-connection.SetBlocksSync(blocks.ToArray());
 
-// Get build area set on the server
-Vec3Int[] buildArea = connection.GetBuildArea();
+BiomePoint[] biomePoints = connection.GetBiomesSync(new Vec3Int(0, 65, 0), new Vec3Int(5, 5, 1));
+
+announce("Client done", connection);
+
 ```
