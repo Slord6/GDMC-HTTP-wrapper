@@ -1,4 +1,5 @@
-﻿using GDMCHttp.Data;
+﻿using GDMCHttp.Commands;
+using GDMCHttp.Data;
 using System;
 using System.Net;
 using System.Text.RegularExpressions;
@@ -70,8 +71,9 @@ namespace GDMCHttp
             {
                 string query = "?" + FormatPositionQuery(position);
                 query += "&includeState=true";
-                string nameAndProperties = client.DownloadString(new Uri(BlockEndpoint.AbsoluteUri + query));
-                return new Block(new BlockProperties(nameAndProperties), position);
+                query += "&includeData=true";
+                string blockData = client.DownloadString(new Uri(BlockEndpoint.AbsoluteUri + query));
+                return new Block(new BlockProperties(blockData), position);
             }
         }
 
@@ -119,6 +121,41 @@ namespace GDMCHttp
                 string result = webClient.UploadString(CommandEndpoint.AbsoluteUri, WebRequestMethods.Http.Put, body);
                 return result.Split('\n');
             }
+        }
+
+        /// <summary>
+        /// Push the given commands to the server
+        /// </summary>
+        /// <param name="commands">Commands to send</param>
+        /// <returns>Server responses</returns>
+        public string[] SendCommandsSync(ICommand[] commands)
+        {
+            string[] commandStrings = new string[commands.Length];
+            for (int i = 0; i < commands.Length; i++)
+            {
+                commandStrings[i] = commands[i].ToCommandString();
+            }
+            return SendCommandsSync(commandStrings);
+        }
+
+        /// <summary>
+        /// Push the given command to the server
+        /// </summary>
+        /// <param name="command">Command to send</param>
+        /// <returns>Server response</returns>
+        public string SendCommandSync(string command)
+        {
+            return String.Join("\n", SendCommandsSync(new string[] { command }));
+        }
+
+        /// <summary>
+        /// Push the given command to the server
+        /// </summary>
+        /// <param name="command">Command to send</param>
+        /// <returns>Server response</returns>
+        public string SendCommandSync(ICommand command)
+        {
+            return String.Join("\n", SendCommandsSync(new ICommand[] { command }));
         }
 
         /// <summary>
