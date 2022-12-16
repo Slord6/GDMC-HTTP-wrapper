@@ -12,15 +12,15 @@ namespace GDMCHttp.Data
         private BlockName name;
         private Vec3Int position;
         private Dictionary<BlockProperty, string> properties;
-        private Dictionary<string, string> blockStates;
+        private string blockStates;
 
         public BlockName Name { get => name; }
         public Vec3Int Position { get => position; }
         public string NamespacedName { get => "minecraft:" + name.ToString(); }
         public Dictionary<BlockProperty, string> Properties { get => properties; }
-        private Dictionary<string, string> BlockStates { get => blockStates; }
+        private string BlockStates { get => blockStates; }
 
-        public BlockProperties(BlockName name, Dictionary<BlockProperty, string> properties, Dictionary<string, string> blockStates, Vec3Int position)
+        public BlockProperties(BlockName name, Dictionary<BlockProperty, string> properties, string blockStates, Vec3Int position)
         {
             this.name = name;
             this.properties = properties;
@@ -28,7 +28,7 @@ namespace GDMCHttp.Data
             this.position = position;
         }
 
-        public BlockProperties(BlockName name, Vec3Int position) : this(name, new Dictionary<BlockProperty, string>(), new Dictionary<string, string>(), position)
+        public BlockProperties(BlockName name, Vec3Int position) : this(name, new Dictionary<BlockProperty, string>(), "", position)
         {
         }
 
@@ -52,7 +52,7 @@ namespace GDMCHttp.Data
             this.properties = PropertiesFromString(propertiesString);
             // 7 = blockstates
             string blockstates = match.Groups[7].Value;
-            this.blockStates = new Dictionary<string, string>();
+            this.blockStates = blockstates;
         }
 
         /// <summary>
@@ -103,6 +103,7 @@ namespace GDMCHttp.Data
                 stringBuilder.Append($"{propertyPair.Key}={propertyPair.Value},");
             }
             stringBuilder.Append("]");
+            stringBuilder.Append(BlockStates);
             return stringBuilder.ToString();
         }
     }
