@@ -1,5 +1,4 @@
 ﻿using GDMCHttp.Data;
-using GDMCHttp.Data.Chunks;
 using System;
 using System.Net;
 using System.Text.RegularExpressions;
@@ -9,7 +8,6 @@ namespace GDMCHttp
     public class Connection
     {
         private static string blockEndpoint = "/blocks";
-        private static string chunkEndpoint = "/chunks";
         private static string commandsEndpoint = "/command";
         private static string buildAreaEndpoint = "/buildarea";
         private Uri root;
@@ -22,14 +20,6 @@ namespace GDMCHttp
             get
             {
                 return new Uri(root, blockEndpoint);
-            }
-        }
-
-        private Uri ChunkEndpoint
-        {
-            get
-            {
-                return new Uri(root, chunkEndpoint);
             }
         }
 
@@ -199,29 +189,6 @@ namespace GDMCHttp
                 formatted[i] = $"~{offset.X} ~{offset.Y} ~{offset.Z} {blocks[i].ToString()}";
             }
             return formatted;
-        }
-
-        /// <summary>
-        /// Get chunks from the server
-        /// </summary>
-        /// <param name="position">Position within the starting chunk</param>
-        /// <param name="dx">Number of chunks in 'x' to get</param>
-        /// <param name="dz">Number of chunks in 'y'</param>
-        /// <returns>Chunks</returns>
-        public Chunk[] GetChunksSync(Vec3Int position, int dx = 1, int dz = 1)
-        {
-            // Get "chunck coordinate"
-            Vec3Int chunkLocation = Chunk.ToChunkCoords(position);
-
-            using (WebClient webClient = new WebClient())
-            {
-                string query = $"?x={chunkLocation.X}&z={chunkLocation.Z}&dx={dx}&dz={dz}";
-                string address = $"{ChunkEndpoint.AbsoluteUri}{query}";
-                webClient.Headers.Add(HttpRequestHeader.Accept, "application/octet-stream");
-                byte[] data = webClient.DownloadData(address);
-
-                return Chunk.ParseToChunks(data);
-            }
         }
     }
 }

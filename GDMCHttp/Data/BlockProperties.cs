@@ -4,12 +4,13 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 
-namespace GDMCHttp.Data.Chunks
+namespace GDMCHttp.Data
 {
     public class BlockProperties
     {
         private string name;
         private Dictionary<BlockProperty, string> properties;
+        private Tags tags;
 
         public string Name { get => name; }
         public Dictionary<BlockProperty, string> Properties { get => properties; }
@@ -18,19 +19,21 @@ namespace GDMCHttp.Data.Chunks
         {
             this.name = "minecraft:" + name.ToString();
             this.properties = properties;
+            this.tags = new Tags();
         }
 
         public BlockProperties(string name, Dictionary<BlockProperty, string> properties)
         {
             this.name = name;
             this.properties = properties;
+            this.tags = new Tags();
         }
 
         public BlockProperties(string nameWithProperties)
         {
             string[] sections = nameWithProperties.Split(new char[] { '[' });
-            this.name = sections[0];
-            this.properties = PropertiesFromString(sections[1]);
+            name = sections[0];
+            properties = PropertiesFromString(sections[1]);
         }
 
         public BlockProperties(TagCompound blockData)
@@ -46,7 +49,7 @@ namespace GDMCHttp.Data.Chunks
                 TagString prop = (TagString)property;
 
                 BlockProperty parsedProperty;
-                if(Enum.TryParse<BlockProperty>(prop.Name, out parsedProperty))
+                if (Enum.TryParse<BlockProperty>(prop.Name, out parsedProperty))
                 {
                     properties.Add(parsedProperty, prop.Value);
                 }
@@ -63,7 +66,7 @@ namespace GDMCHttp.Data.Chunks
             {
                 string[] splitPair = pairs[i].Split(new char[] { '=' });
                 BlockProperty blockProperty;
-                if(Enum.TryParse<BlockProperty>(splitPair[0], out blockProperty))
+                if (Enum.TryParse<BlockProperty>(splitPair[0], out blockProperty))
                 {
                     parsedPairs.Add(blockProperty, splitPair[1]);
                 }

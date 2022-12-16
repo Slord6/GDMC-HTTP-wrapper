@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace GDMCHttp.Data.Chunks
+namespace GDMCHttp.Data
 {
     /// <summary>
     /// All block property names
