@@ -71,4 +71,222 @@ namespace GDMCHttp.Data
         end_barrens = 62,
         UNKNOWN = 999
     }
+
+    /// <summary>
+    /// Categories for biomes. Description and information as per https://minecraft.fandom.com/wiki/Biome#Overworld
+    /// </summary>
+    public static class BiomeCategories
+    {
+        /// <summary>
+        /// In these biomes, it always snows instead of rains and no matter the height; all sources of water exposed to the sky quickly freeze.
+        /// The foliage and grass have a dull aqua green color.
+        /// </summary>
+        public static Biome[] Snowy
+        {
+            get
+            {
+                return new Biome[]
+                {
+                    Biome.snowy_plains,
+                    Biome.ice_spikes,
+                    Biome.snowy_taiga,
+                    Biome.snowy_beach,
+                    Biome.grove,
+                    Biome.snowy_slopes,
+                    Biome.jagged_peaks,
+                    Biome.frozen_peaks
+                };
+            }
+        }
+
+        /// <summary>
+        /// In these biomes, it begins to snow above y=120 in windswept hills and stony shore, above y=160 in taiga and old growth spruce taiga,
+        /// and above y=200 in old growth pine taiga. Otherwise, it rains. Foliage and grass are turquoise green in these biomes.
+        /// </summary>
+        public static Biome[] Cold
+        {
+            get
+            {
+                return new Biome[]
+                {
+                    Biome.windswept_hills,
+                    Biome.windswept_gravelly_hills,
+                    Biome.windswept_forest,
+                    Biome.taiga,
+                    Biome.old_growth_pine_taiga,
+                    Biome.old_growth_spruce_taiga,
+                    Biome.stony_shore
+                };
+            }
+        }
+
+        public static Biome[] Temperate
+        {
+            get
+            {
+                return new Biome[]
+                {
+                    Biome.plains,
+                    Biome.sunflower_plains,
+                    Biome.forest,
+                    Biome.flower_forest,
+                    Biome.birch_forest,
+                    Biome.old_growth_birch_forest,
+                    Biome.dark_forest,
+                    Biome.swamp,
+                    Biome.mangrove_swamp,
+                    Biome.jungle,
+                    Biome.sparse_jungle,
+                    Biome.bamboo_jungle,
+                    Biome.beach,
+                    Biome.mushroom_fields,
+                    Biome.meadow,
+                    Biome.stony_peaks
+                };
+            }
+        }
+
+        /// <summary>
+        /// In these biomes, it neither rains nor snows at all, but the sky still turns overcast during inclement weather.
+        /// The foliage and grass is an olive tone, except badlands biomes, which have brown grass and the sky color is much brighter specially in deserts
+        /// and badlands.
+        /// Additionally, a snow golem spawned or brought into one of these biomes melts (takes heat damage) unless it has the Fire Resistance effect.
+        /// </summary>
+        public static Biome[] Warm
+        {
+            get
+            {
+                return new Biome[]
+                {
+                    Biome.desert,
+                    Biome.savanna,
+                    Biome.savanna_plateau,
+                    Biome.windswept_savanna,
+                    Biome.badlands,
+                    Biome.wooded_badlands,
+                    Biome.eroded_badlands
+                };
+            }
+        }
+
+        /// <summary>
+        /// These biomes are used for the generation of bodies of water such as rivers and oceans.
+        /// Oceans are large, open biomes made entirely of water going up to y=63, with underwater relief on the sea floor, such as small mountains and plains,
+        /// usually including gravel. Squid and fish spawn frequently in the water.
+        /// Underwater cave entrances can be found frequently at the bottom of oceans and rivers. These are the only biomes where underwater music plays.
+        /// </summary>
+        public static Biome[] Aquatic
+        {
+            get
+            {
+                return new Biome[]
+                {
+                    Biome.river,
+                    Biome.frozen_river,
+                    Biome.warm_ocean,
+                    Biome.lukewarm_ocean,
+                    Biome.deep_lukewarm_ocean,
+                    Biome.ocean,
+                    Biome.deep_ocean,
+                    Biome.cold_ocean,
+                    Biome.deep_cold_ocean,
+                    Biome.frozen_ocean,
+                    Biome.deep_frozen_ocean
+                };
+            }
+        }
+
+        public static Biome[] ColdAquatic
+        {
+            get
+            {
+                return new Biome[]
+                {
+                    Biome.frozen_river,
+                    Biome.cold_ocean,
+                    Biome.deep_cold_ocean,
+                    Biome.frozen_ocean,
+                    Biome.deep_frozen_ocean
+                };
+            }
+        }
+
+        public static Biome[] TemperateAquatic
+        {
+            get
+            {
+                return new Biome[]
+                {
+                    Biome.river,
+                    Biome.lukewarm_ocean,
+                    Biome.deep_lukewarm_ocean,
+                    Biome.ocean,
+                    Biome.deep_ocean
+                };
+            }
+        }
+
+        public static Biome[] WarmAquatic
+        {
+            get
+            {
+                return new Biome[]
+                {
+                    Biome.warm_ocean
+                };
+            }
+        }
+
+        /// <summary>
+        /// These biomes generates inside caves. Their placement are 3D, compared to other Overworld biomes, which use 2D.
+        /// They're mostly found underground but can sometimes leak out of cave entrances at any height.
+        /// </summary>
+        public static Biome[] Cave
+        {
+            get
+            {
+                return new Biome[]
+                {
+                    Biome.deep_dark,
+                    Biome.dripstone_caves,
+                    Biome.lush_caves
+                };
+            }
+        }
+
+        /// <summary>
+        /// The Nether is considered a different dimension.
+        /// It is a hellish place; all biomes in this dimension are dry and it is not possible to place water in these biomes, though ice can still be placed.
+        /// Additionally, packed ice and blue ice never melt in the nether, as with the other non-freezing biomes.
+        /// </summary>
+        public static Biome[] Nether
+        {
+            get
+            {
+                return new Biome[]
+                {
+                    Biome.nether_wastes,
+                    Biome.soul_sand_valley,
+                    Biome.crimson_forest,
+                    Biome.warped_forest,
+                    Biome.basalt_deltas
+                };
+            }
+        }
+
+        public static Biome[] End
+        {
+            get
+            {
+                return new Biome[]
+                {
+                    Biome.the_end,
+                    Biome.small_end_islands,
+                    Biome.end_midlands,
+                    Biome.end_highlands,
+                    Biome.end_barrens
+                };
+            }
+        }
+    }
 }

@@ -14,11 +14,8 @@ announce("Client connected", connection);
 McWorld world = new McWorld(connection);
 world.RefreshCache();
 
-Block b = world.GetBlock(world.BuildArea.CornerA);
-
-Block[,] heightmap = world.CalculateHeightMap();
-Block[] flatHeightmap = heightmap.Cast<Block>().Where(b => b != null).ToArray();
-world.ReplaceBlocks(flatHeightmap, BlockName.diamond_block);
+Dictionary<BlockName, int> availableResources = world.AvailableResources();
+Biome[] biomes = world.BiomesInArea();
 
 world.Flush();
 

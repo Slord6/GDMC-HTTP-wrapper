@@ -10,10 +10,12 @@ namespace GDMCHttp
         public Connection Connection { get; set; }
         public Area BuildArea { get; set; }
         private Block[] blockCache;
+        private BiomePoint[] biomeCache;
 
         public McWorld(Connection connection)
         {
             this.Connection = connection;
+            RefreshCache();
         }
 
         /// <summary>
@@ -23,6 +25,7 @@ namespace GDMCHttp
         {
             BuildArea = Connection.GetBuildAreaSync();
             blockCache = Connection.GetBlocksSync(BuildArea.CornerA, BuildArea.OffsetAToB);
+            biomeCache = Connection.GetBiomesSync(BuildArea.CornerA, BuildArea.OffsetAToB);
         }
 
         /// <summary>
@@ -184,6 +187,35 @@ namespace GDMCHttp
                 dimensional[offset.X, offset.Y, offset.Z] = block;
             }
             return dimensional;
+        }
+
+        /// <summary>
+        /// Count the types of block available in the cache
+        /// </summary>
+        /// <returns>Dictionary of count of each block type</returns>
+        public Dictionary<BlockName, int> AvailableResources()
+        {
+            Dictionary<BlockName, int> availableResources = new Dictionary<BlockName, int>();
+            for (int i = 0; i < blockCache.Length; i++)
+            {
+                if (!availableResources.ContainsKey(blockCache[i].Name)) availableResources.Add(blockCache[i].Name, 0);
+                availableResources[blockCache[i].Name]++;
+            }
+            return availableResources;
+        }
+
+        /// <summary>
+        /// Search the local biome cache to find all biomes in the buildarea
+        /// </summary>
+        /// <returns>The biomes in the build area</returns>
+        public Biome[] BiomesInArea()
+        {
+            List<Biome> biomes = new List<Biome>();
+            for (int i = 0; i < biomeCache.Length; i++)
+            {
+                if (!biomes.Contains(biomeCache[i].Biome)) biomes.Add(biomeCache[i].Biome);
+            }
+            return biomes.ToArray();
         }
     }
 }
