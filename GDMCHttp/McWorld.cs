@@ -98,6 +98,11 @@ namespace GDMCHttp
             return didReplacement;
         }
 
+        /// <summary>
+        /// Replace all the blocks with new ones of the given type
+        /// </summary>
+        /// <param name="blocks">Blocks to replace</param>
+        /// <param name="newType">New block type</param>
         public void ReplaceBlocks(Block[] blocks, BlockName newType)
         {
             for (int i = 0; i < blocks.Length; i++)
@@ -134,6 +139,13 @@ namespace GDMCHttp
             return null;
         }
 
+        /// <summary>
+        /// Calculate the heightmap for the cached area
+        /// </summary>
+        /// <param name="waterIsGround">Should water blocks be counted as ground</param>
+        /// <returns>The 2D block array of the heighest solid blocks in the cache area, (x,z).
+        /// Null values mean there were no solid blocks in that column in the cache
+        /// </returns>
         public Block[,] CalculateHeightMap(bool waterIsGround = false)
         {
             Block[,,] dimensional = DimensionalRepresentation();
@@ -157,6 +169,10 @@ namespace GDMCHttp
             return heightmap;
         }
 
+        /// <summary>
+        /// Arrange the cache into an x,y,z array
+        /// </summary>
+        /// <returns>Cache blocks</returns>
         public Block[,,] DimensionalRepresentation()
         {
             Vec3Int size = BuildArea.Size;
