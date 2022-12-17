@@ -32,7 +32,17 @@ namespace GDMCHttp.Data
             if (obj.GetType() != typeof(Vec3Int)) return false;
             Vec3Int other = (Vec3Int)obj;
 
-            return x == other.x && y == other.y && z == other.z;
+            return other == this;
+        }
+
+        public static bool operator ==(Vec3Int a, Vec3Int b)
+        {
+            return a.x == b.x && a.y == b.y && a.z == b.z;
+        }
+
+        public static bool operator !=(Vec3Int a, Vec3Int b)
+        {
+            return !(a == b);
         }
 
         public override int GetHashCode()
@@ -91,9 +101,48 @@ namespace GDMCHttp.Data
             return a;
         }
 
-        public static Vec3Int Offset(Vec3Int root, Vec3Int offset)
+        /// <summary>
+        /// Get the neighbouring positions of the given one
+        /// </summary>
+        /// <param name="pos">Center position</param>
+        /// <returns>All neighbour positions of the position</returns>
+        public static Vec3Int[] Neighbours(Vec3Int pos)
         {
-            return new Vec3Int(root.x + offset.x, root.y + offset.y, root.z + offset.z);
+            List<Vec3Int> neighbours = new List<Vec3Int>();
+            for (int x = -1; x <= 1; x++)
+            {
+                for (int y = -1; y <= 1; y++)
+                {
+                    for (int z = -1; z <= 1; z++)
+                    {
+                        Vec3Int offset = new Vec3Int(x, y, z);
+                        neighbours.Add(Vec3Int.Add(pos, offset));
+                    }
+                }
+            }
+            return neighbours.ToArray();
+        }
+
+        /// <summary>
+        /// a+b
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <returns></returns>
+        public static Vec3Int Add(Vec3Int a, Vec3Int b)
+        {
+            return new Vec3Int(a.x + b.x, a.y + b.y, a.z + b.z);
+        }
+
+        /// <summary>
+        /// a-b
+        /// </summary>
+        /// <param name="a"></param>
+        /// <param name="b"></param>
+        /// <returns></returns>
+        public static Vec3Int Sub(Vec3Int a, Vec3Int b)
+        {
+            return new Vec3Int(a.x - b.x, a.y - b.y, a.z - b.z);
         }
 
         public static bool TryParse(string value, out Vec3Int position)

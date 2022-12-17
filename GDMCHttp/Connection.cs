@@ -80,13 +80,30 @@ namespace GDMCHttp
         /// <returns>The Block data</returns>
         public Block GetBlockSync(Vec3Int position)
         {
+            return GetBlocksSync(position, new Vec3Int(1, 1, 1))[0];
+        }
+
+        public Block[] GetBlocksSync(Vec3Int position, Vec3Int offset)
+        {
             using (WebClient client = new WebClient())
             {
                 string query = "?" + FormatPositionQuery(position);
                 query += "&includeState=true";
                 query += "&includeData=true";
+                if(offset != new Vec3Int(1,1,1))
+                {
+                    query += "&" + FormatPositionQuery(offset, true);
+                }
                 string blockData = client.DownloadString(new Uri(BlockEndpoint.AbsoluteUri + query));
-                return new Block(blockData);
+                string[] blocksData = blockData.Split('\n');
+                Block[] blocks = new Block[blocksData.Length];
+
+                for (int i = 0; i < blocks.Length; i++)
+                {
+                    blocks[i] = new Block(blocksData[i]);
+                }
+
+                return blocks;
             }
         }
 
@@ -212,7 +229,7 @@ namespace GDMCHttp
         /// Get the build area set on the server
         /// </summary>
         /// <returns>Array with two positions representing two corners of a cuboid build area</returns>
-        public Vec3Int[] GetBuildAreaSync()
+        public Area GetBuildAreaSync()
         {
             using (WebClient client = new WebClient())
             {
@@ -236,11 +253,10 @@ namespace GDMCHttp
                     i++;
                 }
 
-                return new Vec3Int[]
-                {
+                return new Area(
                     new Vec3Int(numbers[0],numbers[1],numbers[2]),
                     new Vec3Int(numbers[3],numbers[4],numbers[5])
-                };
+                );
             }
         }
 
@@ -256,7 +272,7 @@ namespace GDMCHttp
             for (int i = 0; i < blocks.Length; i++)
             {
                 Vec3Int blockPos = blocks[i].Position;
-                offsets[i] = new Vec3Int(blockPos.X - from.X, blockPos.Y - from.Y, blockPos.Z - from.Z);
+                offsets[i] = Vec3Int.Sub(blockPos, from);
             }
             return offsets;
         }

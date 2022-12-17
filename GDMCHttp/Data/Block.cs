@@ -45,7 +45,7 @@ namespace GDMCHttp.Data
                 fullName += Properties.ToString();
             }
 
-            return properties.Position.ToString() + " " + fullName;
+            return fullName;
         }
     }
 }

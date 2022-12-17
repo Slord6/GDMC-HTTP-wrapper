@@ -31,6 +31,11 @@ namespace GDMCHttp.Data
         {
         }
 
+        public BlockProperties(BlockName name, Vec3Int position, BlockProperties otherProperties): this(name, otherProperties.properties, otherProperties.blockStates, position)
+        {
+
+        }
+
         /// <summary>
         /// Construct a BlockProperties from a raw string
         /// </summary>
