@@ -11,6 +11,7 @@ namespace GDMCHttp
         public Area BuildArea { get; set; }
         private Block[] blockCache;
         private BiomePoint[] biomeCache;
+        private List<Block> changedBlocks;
 
         public McWorld(Connection connection)
         {
@@ -26,14 +27,22 @@ namespace GDMCHttp
             BuildArea = Connection.GetBuildAreaSync();
             blockCache = Connection.GetBlocksSync(BuildArea.CornerA, BuildArea.OffsetAToB);
             biomeCache = Connection.GetBiomesSync(BuildArea.CornerA, BuildArea.OffsetAToB);
+            changedBlocks = new List<Block>();
         }
 
         /// <summary>
         /// Submit the cache to the server to update the world
         /// </summary>
-        public void Flush()
+        public void Flush(bool refreshCache = false)
         {
-            Connection.SetBlocksSync(blockCache);
+            if(changedBlocks.Count == 0) return;
+            Connection.SetBlocksSync(changedBlocks.ToArray());
+            changedBlocks = new List<Block>();
+
+            if (refreshCache)
+            {
+                RefreshCache();
+            }
         }
 
         /// <summary>
@@ -48,6 +57,7 @@ namespace GDMCHttp
             int index = Array.IndexOf(blockCache, currentBlock);
             if (index == -1) return false;
             blockCache[index] = newBlock;
+            changedBlocks.Add(newBlock);
             return true;
         }
 
@@ -64,6 +74,7 @@ namespace GDMCHttp
                 if(position == blockCache[i].Position)
                 {
                     blockCache[i] = newBlock;
+                    changedBlocks.Add(blockCache[i]);
                     return true;
                 }
             }
@@ -94,6 +105,7 @@ namespace GDMCHttp
                     {
                         blockCache[i] = new Block(newType, block.Position);
                     }
+                    changedBlocks.Add(blockCache[i]);
                     didReplacement = true;
                     if (firstOnly) break;
                 }
@@ -142,6 +154,45 @@ namespace GDMCHttp
             return null;
         }
 
+        public Block[] GetNeighbours(Block block)
+        {
+            return GetNeighbours(block.Position, Vec3Int.Neighbours);
+        }
+
+        public Block[] GetNeighbours(Vec3Int position)
+        {
+            return GetNeighbours(position, Vec3Int.Neighbours);
+        }
+
+        public Block[] GetNeighboursOrthogonal(Block block)
+        {
+            return GetNeighbours(block.Position, Vec3Int.NeighboursOrthogonal);
+        }
+
+        public Block[] GetNeighboursOrthogonal(Vec3Int position)
+        {
+            return GetNeighbours(position, Vec3Int.NeighboursOrthogonal);
+        }
+
+        /// <summary>
+        /// Get the neighbouring 
+        /// </summary>
+        /// <param name="position"></param>
+        /// <returns></returns>
+        private Block[] GetNeighbours(Vec3Int position, Func<Vec3Int, Vec3Int[]> getNeighbourPosFunc)
+        {
+            List<Block> neighbours = new List<Block>();
+            Vec3Int[] neighbourPositions = getNeighbourPosFunc(position);
+            for (int i = 0; i < neighbourPositions.Length; i++)
+            {
+                Vec3Int neighbourPosition = neighbourPositions[i];
+                Block neighbourBlock = GetBlock(neighbourPosition);
+                if (neighbourBlock == null) continue;
+                neighbours.Add(neighbourBlock);
+            }
+            return neighbours.ToArray();
+        }
+
         /// <summary>
         /// Calculate the heightmap for the cached area
         /// </summary>
@@ -179,11 +230,13 @@ namespace GDMCHttp
         public Block[,,] DimensionalRepresentation()
         {
             Vec3Int size = BuildArea.Size;
+            Vec3Int minCorner = Vec3Int.MergeToMin(BuildArea.CornerA, BuildArea.CornerB);
             Block[,,] dimensional = new Block[size.X, size.Y, size.Z];
             for (int i = 0; i < blockCache.Length; i++)
             {
                 Block block = blockCache[i];
-                Vec3Int offset = Vec3Int.Sub(block.Position, BuildArea.CornerA);
+
+                Vec3Int offset = Vec3Int.Sub(block.Position, minCorner);
                 dimensional[offset.X, offset.Y, offset.Z] = block;
             }
             return dimensional;

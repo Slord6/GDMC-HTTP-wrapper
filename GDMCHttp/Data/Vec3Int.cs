@@ -45,6 +45,16 @@ namespace GDMCHttp.Data
             return !(a == b);
         }
 
+        public static Vec3Int operator +(Vec3Int a, Vec3Int b)
+        {
+            return Vec3Int.Add(a, b);
+        }
+
+        public static Vec3Int operator -(Vec3Int a, Vec3Int b)
+        {
+            return Vec3Int.Sub(a, b);
+        }
+
         public override int GetHashCode()
         {
             // https://stackoverflow.com/questions/3404715/c-sharp-hashcode-for-array-of-ints
@@ -115,8 +125,31 @@ namespace GDMCHttp.Data
                 {
                     for (int z = -1; z <= 1; z++)
                     {
+                        if (x == 0 && y == 0 && z == 0) continue;
                         Vec3Int offset = new Vec3Int(x, y, z);
                         neighbours.Add(Vec3Int.Add(pos, offset));
+                    }
+                }
+            }
+            return neighbours.ToArray();
+        }
+
+        public static Vec3Int[] NeighboursOrthogonal(Vec3Int pos)
+        {
+
+            List<Vec3Int> neighbours = new List<Vec3Int>();
+            for (int x = -1; x <= 1; x++)
+            {
+                for (int y = -1; y <= 1; y++)
+                {
+                    for (int z = -1; z <= 1; z++)
+                    {
+                        if (x == 0 && y == 0 && z == 0) continue;
+                        if (x == 0 || z == 0)
+                        {
+                            Vec3Int offset = new Vec3Int(x, y, z);
+                            neighbours.Add(Vec3Int.Add(pos, offset));
+                        }
                     }
                 }
             }
@@ -143,6 +176,12 @@ namespace GDMCHttp.Data
         public static Vec3Int Sub(Vec3Int a, Vec3Int b)
         {
             return new Vec3Int(a.x - b.x, a.y - b.y, a.z - b.z);
+        }
+
+        public static int TaxiCabDistance(Vec3Int a, Vec3Int b)
+        {
+            Vec3Int diff = Vec3Int.Sub(b, a);
+            return Math.Abs(diff.x) + Math.Abs(diff.y) + Math.Abs(diff.z);
         }
 
         public static bool TryParse(string value, out Vec3Int position)

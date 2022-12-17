@@ -72,6 +72,8 @@ namespace GDMCHttp.Data
         hatch,
         note,
         instrument,
-        enabled
+        enabled,
+        thickness,
+        vertical_direction
     }
 }
