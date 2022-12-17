@@ -98,6 +98,14 @@ namespace GDMCHttp
             return didReplacement;
         }
 
+        public void ReplaceBlocks(Block[] blocks, BlockName newType)
+        {
+            for (int i = 0; i < blocks.Length; i++)
+            {
+                ReplaceBlock(blocks[i], new Block(newType, blocks[i].Position));
+            }
+        }
+
         /// <summary>
         /// Checks if a block in the cache exists that has a matching position
         /// </summary>
@@ -124,6 +132,42 @@ namespace GDMCHttp
                 if (blockCache[i].Position == position) return blockCache[i];
             }
             return null;
+        }
+
+        public Block[,] CalculateHeightMap(bool waterIsGround = false)
+        {
+            Block[,,] dimensional = DimensionalRepresentation();
+            Vec3Int size = BuildArea.Size;
+            Block[,] heightmap = new Block[size.X, size.Z];
+            for (int x = 0; x < size.X; x++)
+            {
+                for (int z = 0; z < size.Z; z++)
+                {
+                    Block heighest = null;
+                    for (int y = size.Y - 1; y >= 0; y--)
+                    {
+                        Block current = dimensional[x, y, z];
+                        if (!BlockCategories.IsGroundBlock(current.Name, false, waterIsGround, false)) continue;
+                        heighest = current;
+                        break;
+                    }
+                    heightmap[x, z] = heighest;
+                }
+            }
+            return heightmap;
+        }
+
+        public Block[,,] DimensionalRepresentation()
+        {
+            Vec3Int size = BuildArea.Size;
+            Block[,,] dimensional = new Block[size.X, size.Y, size.Z];
+            for (int i = 0; i < blockCache.Length; i++)
+            {
+                Block block = blockCache[i];
+                Vec3Int offset = Vec3Int.Sub(block.Position, BuildArea.CornerA);
+                dimensional[offset.X, offset.Y, offset.Z] = block;
+            }
+            return dimensional;
         }
     }
 }

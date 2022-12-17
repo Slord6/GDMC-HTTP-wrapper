@@ -1,6 +1,7 @@
 ﻿using GDMCHttp;
 using GDMCHttp.Commands;
 using GDMCHttp.Data;
+using System.Linq;
 
 Func<string, Connection, string> announce = (string msg, Connection connection) =>
 {
@@ -14,7 +15,11 @@ McWorld world = new McWorld(connection);
 world.RefreshCache();
 
 Block b = world.GetBlock(world.BuildArea.CornerA);
-world.ReplaceBlock(BlockName.gold_block, BlockName.grass_block, false);
+
+Block[,] heightmap = world.CalculateHeightMap();
+Block[] flatHeightmap = heightmap.Cast<Block>().Where(b => b != null).ToArray();
+world.ReplaceBlocks(flatHeightmap, BlockName.diamond_block);
+
 world.Flush();
 
 announce("Client done", connection);

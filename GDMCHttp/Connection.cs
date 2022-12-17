@@ -97,6 +97,7 @@ namespace GDMCHttp
                 string blockData = client.DownloadString(new Uri(BlockEndpoint.AbsoluteUri + query));
                 string[] blocksData = blockData.Split('\n');
                 Block[] blocks = new Block[blocksData.Length];
+                if (blockData == "") return blocks;
 
                 for (int i = 0; i < blocks.Length; i++)
                 {

@@ -1,6 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 
 namespace GDMCHttp.Data
 {
@@ -939,5 +939,165 @@ namespace GDMCHttp.Data
         potted_azalea_bush,
         potted_flowering_azalea_bush,
         UNKNOWN
+    }
+
+    public static class BlockCategories
+    {
+        private static HashSet<BlockName> groundBlocks;
+        private static BlockName[] allBlockNames;
+        private static HashSet<BlockName> plantBlocks;
+
+        private static HashSet<BlockName> GroundBlocks
+        {
+            get
+            {
+                if (groundBlocks == null) groundBlocks = GenerateGroundBlocks();
+                return groundBlocks;
+            }
+            set { groundBlocks = value; }
+        }
+
+
+        private static HashSet<BlockName> PlantBlocks
+        {
+            get
+            {
+                if (plantBlocks == null) plantBlocks = GeneratePlantBlocks();
+                return plantBlocks;
+            }
+            set { plantBlocks = value; }
+        }
+
+        private static BlockName[] AllBlockNames
+        {
+            get
+            {
+                if (allBlockNames == null) allBlockNames = Enum.GetValues(typeof(BlockName)).Cast<BlockName>().ToArray();
+                return allBlockNames;
+            }
+            set { allBlockNames = value; }
+        }
+
+        private static HashSet<BlockName> GeneratePlantBlocks()
+        {
+            HashSet<BlockName> plantBlocks = new HashSet<BlockName>()
+        {
+            BlockName.allium,
+            BlockName.cactus,
+            BlockName.wheat,
+            BlockName.potatoes,
+            BlockName.carrots,
+            BlockName.oxeye_daisy,
+            BlockName.dandelion
+        };
+
+
+            // Add groups, eg all woods
+            string[] keyWords = new string[]
+            {
+            "log",
+            "leaves",
+            "sapling",
+            "tulip",
+            "orchid",
+            "grass",
+            "fern"
+            };
+
+            foreach (BlockName blockName in AllBlockNames)
+            {
+                for (int i = 0; i < keyWords.Length; i++)
+                {
+                    if (blockName.ToString().Contains(keyWords[i]))
+                    {
+                        groundBlocks.Add(blockName);
+                        break;
+                    }
+                }
+
+            }
+
+            return plantBlocks;
+        }
+
+        private static HashSet<BlockName> GenerateGroundBlocks()
+        {
+
+            HashSet<BlockName> groundBlocks = new HashSet<BlockName>()
+        {
+            BlockName.dirt,
+            BlockName.coarse_dirt,
+            BlockName.stone,
+            BlockName.diorite,
+            BlockName.andesite,
+            BlockName.grass_block,
+            BlockName.dirt_path,
+            BlockName.gravel,
+            BlockName.sand,
+            BlockName.sandstone,
+            BlockName.bedrock,
+            BlockName.granite,
+            BlockName.mossy_cobblestone,
+            BlockName.spawner,
+            BlockName.obsidian,
+            BlockName.clay,
+            BlockName.chest,
+            BlockName.end_portal_frame,
+            BlockName.end_portal
+        };
+
+            // Add groups, eg all ores
+            string[] keyWords = new string[]
+            {
+            "ore"
+            };
+
+            foreach (BlockName blockName in AllBlockNames)
+            {
+                for (int i = 0; i < keyWords.Length; i++)
+                {
+                    if (blockName.ToString().Contains(keyWords[i]))
+                    {
+                        groundBlocks.Add(blockName);
+                        break;
+                    }
+                }
+
+            }
+
+            return groundBlocks;
+        }
+
+        /// <summary>
+        /// Is the block a block that would only be seen in the ground
+        /// </summary>
+        /// <param name="block">Block to test</param>
+        /// <param name="includeUndergroundAir">Include cave air and void air as underground blocks</param>
+        /// <param name="includeWater">Include water as underground block</param>
+        /// <returns>True if the block is a block found in the ground</returns>
+        public static bool IsGroundBlock(BlockName block, bool includeUndergroundAir, bool includeWater, bool includePlants)
+        {
+            bool isGround = GroundBlocks.Contains(block);
+            bool isAir = false;
+            bool isWater = false;
+            bool isPlant = false;
+
+            if (includeUndergroundAir)
+            {
+                isAir = (block == BlockName.cave_air) || (block == BlockName.void_air);
+            }
+
+            if (includeWater)
+            {
+                isWater = (block == BlockName.water);
+            }
+
+            if (includePlants)
+            {
+                isPlant = PlantBlocks.Contains(block);
+            }
+
+            return isGround || isAir || isWater || isPlant;
+        }
     }
 }
