@@ -37,7 +37,7 @@ namespace GDMCHttp.Data
         /// <param name="rawString">String of the format namespaced:name[property=value,property2=value2]{blockstate: {value}}</param>
         public BlockProperties(string rawString)
         {
-            Regex regex = new Regex(@"(\d*) (\d*) (\d*) (minecraft:(\w*))\[(.*)]({.*})");
+            Regex regex = new Regex(@"(-?\d*) (-?\d*) (-?\d*) (minecraft:(\w*))\[(.*)]({.*})");
             Match match = regex.Match(rawString);
             // 0 = whole match
             // 1,2,3 = x,y,z
