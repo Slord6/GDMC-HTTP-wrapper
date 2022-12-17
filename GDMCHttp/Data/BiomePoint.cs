@@ -31,7 +31,7 @@ namespace GDMCHttp.Data
                 return;
             }
 
-            Regex regex = new Regex(@"(\d*) (\d*) (\d*) minecraft:(\w*)");
+            Regex regex = new Regex(@"(-?\d*) (-?\d*) (-?\d*) minecraft:(\w*)");
             Match match = regex.Match(rawBiomePoint);
             this.position = Vec3Int.Parse(match.Groups[1].Value + " " + match.Groups[2].Value + " " + match.Groups[3].Value);
             this.biome = (Biome)Enum.Parse(typeof(Biome), match.Groups[4].Value);
