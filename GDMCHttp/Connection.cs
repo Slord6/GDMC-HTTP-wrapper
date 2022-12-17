@@ -139,7 +139,7 @@ namespace GDMCHttp
         }
 
         /// <summary>
-        /// Syncronously get the biome for a single block
+        /// Syncronously get the biome for a range of blocks
         /// </summary>
         /// <param name="position">The starting point for the query</param>
         /// <param name="offsetRange">The offset from the start point to get data up to</param>
