@@ -15,7 +15,7 @@ namespace GDMCHttp.Data
         /// The fully qualified blockname, with leading "minecraft:"
         /// </summary>
         public string NamespacedName { get => $"minecraft:{Name}"; }
-        public BlockProperties Properties { get => properties; }
+        public BlockProperties BlockProperties { get => properties; }
 
         public Block(BlockName name, Vec3Int position)
         {
@@ -40,9 +40,9 @@ namespace GDMCHttp.Data
         public override string ToString()
         {
             string fullName = NamespacedName;
-            if(Properties != null)
+            if(BlockProperties != null)
             {
-                fullName += Properties.ToString();
+                fullName += BlockProperties.ToString();
             }
 
             return fullName;

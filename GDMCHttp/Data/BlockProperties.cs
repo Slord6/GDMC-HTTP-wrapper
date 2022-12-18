@@ -11,19 +11,27 @@ namespace GDMCHttp.Data
         private BlockName name;
         private Vec3Int position;
         private Dictionary<BlockProperty, string> properties;
-        private string blockStates;
+        private string blockStatesString;
 
         public BlockName Name { get => name; }
         public Vec3Int Position { get => position; }
         public string NamespacedName { get => "minecraft:" + name.ToString(); }
         public Dictionary<BlockProperty, string> Properties { get => properties; }
-        private string BlockStates { get => blockStates; }
+        public string BlockStateString { get => blockStatesString; }
+        public BlockState[] BlockStates
+        {
+            set
+            {
+                string blockStates = string.Join(",", (object[])value);
+                blockStatesString = "{" + blockStates + "}";
+            }
+        }
 
         public BlockProperties(BlockName name, Dictionary<BlockProperty, string> properties, string blockStates, Vec3Int position)
         {
             this.name = name;
             this.properties = properties;
-            this.blockStates = blockStates;
+            this.blockStatesString = blockStates;
             this.position = position;
         }
 
@@ -31,7 +39,7 @@ namespace GDMCHttp.Data
         {
         }
 
-        public BlockProperties(BlockName name, Vec3Int position, BlockProperties otherProperties): this(name, otherProperties.properties, otherProperties.blockStates, position)
+        public BlockProperties(BlockName name, Vec3Int position, BlockProperties otherProperties): this(name, otherProperties.properties, otherProperties.blockStatesString, position)
         {
 
         }
@@ -56,7 +64,28 @@ namespace GDMCHttp.Data
             this.properties = PropertiesFromString(propertiesString);
             // 7 = blockstates
             string blockstates = match.Groups[7].Value;
-            this.blockStates = blockstates;
+            this.blockStatesString = blockstates;
+        }
+
+        public void SetProperty(BlockProperty key, string value)
+        {
+            if(Properties.ContainsKey(key))
+            {
+                Properties[key] = value;
+            }
+            else
+            {
+                Properties.Add(key, value);
+            }
+        }
+
+        public string GetProperty(BlockProperty key)
+        {
+            if(Properties.ContainsKey(key))
+            {
+                return Properties[key];
+            }
+            return null;
         }
 
         /// <summary>
@@ -102,12 +131,15 @@ namespace GDMCHttp.Data
 
             stringBuilder.Append("[");
 
+            int count = 0;
             foreach (KeyValuePair<BlockProperty, string> propertyPair in Properties)
             {
-                stringBuilder.Append($"{propertyPair.Key}={propertyPair.Value},");
+                count++;
+                stringBuilder.Append($"{propertyPair.Key}={propertyPair.Value}");
+                if (count != Properties.Count) stringBuilder.Append(",");
             }
             stringBuilder.Append("]");
-            stringBuilder.Append(BlockStates);
+            stringBuilder.Append(BlockStateString);
             return stringBuilder.ToString();
         }
     }

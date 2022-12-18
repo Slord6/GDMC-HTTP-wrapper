@@ -99,7 +99,7 @@ namespace GDMCHttp
                 {
                     if (keepProperties)
                     {
-                        blockCache[i] = new Block(new BlockProperties(newType, block.Position, block.Properties));
+                        blockCache[i] = new Block(new BlockProperties(newType, block.Position, block.BlockProperties));
                     }
                     else
                     {
@@ -150,6 +150,20 @@ namespace GDMCHttp
             for (int i = 0; i < blockCache.Length; i++)
             {
                 if (blockCache[i].Position == position) return blockCache[i];
+            }
+            return null;
+        }
+
+        /// <summary>
+        /// Returns the first instance of a block with the same name as given
+        /// </summary>
+        /// <param name="name">The block type to find</param>
+        /// <returns>Found block, or null</returns>
+        public Block GetBlock(BlockName name)
+        {
+            for (int i = 0; i < blockCache.Length; i++)
+            {
+                if (blockCache[i].Name == name) return blockCache[i];
             }
             return null;
         }

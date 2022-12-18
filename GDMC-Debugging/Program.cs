@@ -14,25 +14,14 @@ announce("Client connected", connection);
 
 McWorld world = new McWorld(connection);
 world.RefreshCache();
-world.ReplaceBlock(BlockName.diamond_block, BlockName.stone, false);
-world.ReplaceBlock(BlockName.dirt_path, BlockName.stone, false);
-world.ReplaceBlock(BlockName.gold_block, BlockName.stone, false);
-world.ReplaceBlock(BlockName.sandstone, BlockName.stone, false);
-world.ReplaceBlock(BlockName.glass, BlockName.stone, false);
-world.Flush();
 
 
-Block b = world.GetBlock(new Vec3Int(-19, -61, 1));
-Block[] neighbours = world.GetNeighboursOrthogonal(b);
+Block existing = world.GetBlock(BlockName.oak_wall_sign);
+Sign sign = new Sign(BlockName.oak_wall_sign, new string[] { "Four", "three", "two", "one!" }, existing.Position);
+sign.Facing = BlockProperty.north;
 
-Block[,] heightmap = world.CalculateHeightMap();
-
-GDMCHttp.Pathing.Path path = new GDMCHttp.Pathing.Path(heightmap[0, 0], heightmap[15, 15], world);
-
-if(path.Route != null)
-{
-    world.ReplaceBlocks(path.Route, BlockName.glass);
-}
+Console.WriteLine(sign.ToString());
+world.ReplaceBlock(existing, sign);
 
 world.Flush();
 
