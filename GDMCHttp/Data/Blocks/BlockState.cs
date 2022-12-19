@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace GDMCHttp.Data
+namespace GDMCHttp.Data.Blocks
 {
     public class BlockState
     {
@@ -12,9 +12,9 @@ namespace GDMCHttp.Data
         public bool WrapValueInQuotes { get; set; }
         public string KeyWrap { get; set; }
 
-        public BlockState(string key, string value, bool wrapValueInQuotes, char keyWrapChar):this(key, value, wrapValueInQuotes)
+        public BlockState(string key, string value, bool wrapValueInQuotes, char keyWrapChar) : this(key, value, wrapValueInQuotes)
         {
-            this.KeyWrap = keyWrapChar.ToString();
+            KeyWrap = keyWrapChar.ToString();
         }
 
         public BlockState(string key, string value, bool wrapValueInQuotes)
@@ -22,28 +22,28 @@ namespace GDMCHttp.Data
             Key = key;
             Value = value;
             WrapValueInQuotes = wrapValueInQuotes;
-            this.KeyWrap = "";
+            KeyWrap = "";
         }
 
         public BlockState(string key, string value)
         {
             Key = key;
             Value = value;
-            this.KeyWrap = "";
+            KeyWrap = "";
         }
 
         public BlockState(string key, BlockState value)
         {
             Key = key;
             Value = value;
-            this.KeyWrap = "";
+            KeyWrap = "";
         }
 
         public override string ToString()
         {
             string valueString = "";
             Type valueType = Value.GetType();
-            if(valueType == typeof(string))
+            if (valueType == typeof(string))
             {
                 if (WrapValueInQuotes)
                 {
@@ -53,7 +53,8 @@ namespace GDMCHttp.Data
                 {
                     valueString = $"{Value}";
                 }
-            } else
+            }
+            else
             {
                 valueString = $"'{{{Value}}}'";
             }

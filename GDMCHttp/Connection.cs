@@ -1,5 +1,7 @@
 ﻿using GDMCHttp.Commands;
 using GDMCHttp.Data;
+using GDMCHttp.Data.Blocks;
+using GDMCHttp.Data.Position;
 using System;
 using System.Net;
 using System.Text.RegularExpressions;

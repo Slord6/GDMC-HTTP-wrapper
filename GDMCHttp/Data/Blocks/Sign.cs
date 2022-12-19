@@ -1,13 +1,15 @@
-﻿using System;
+﻿using GDMCHttp.Data.Position;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 
-namespace GDMCHttp.Data
+namespace GDMCHttp.Data.Blocks
 {
     public class Sign : Block
     {
         private string[] message;
-        public string[] Message {
+        public string[] Message
+        {
             get
             {
                 return message;
@@ -16,7 +18,7 @@ namespace GDMCHttp.Data
             {
                 if (value.Length != 4) throw new ArgumentException("Signs require 4 lines exactly");
                 message = value;
-                this.BlockProperties.BlockStates = MessageToBlockStates(Message);
+                BlockProperties.BlockStates = MessageToBlockStates(Message);
             }
         }
         public BlockProperty Facing
@@ -38,7 +40,7 @@ namespace GDMCHttp.Data
         public Sign(BlockName signType, string[] message, Vec3Int position) : base(signType, position)
         {
             ThrowOnInvalidSignType(signType);
-            this.Message = message;
+            Message = message;
             Facing = BlockProperty.north;
         }
 
@@ -57,7 +59,7 @@ namespace GDMCHttp.Data
             //  Text4:'{"text":"Four"}'}
             //}
             int lineCount = 4;
-            BlockState[] blockStates = new BlockState[lineCount+2];
+            BlockState[] blockStates = new BlockState[lineCount + 2];
             for (int i = 1; i <= lineCount; i++)
             {
                 string textTitle = $"Text{i}";

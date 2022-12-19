@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 
-namespace GDMCHttp.Data
+namespace GDMCHttp.Data.Blocks
 {
     public enum BlockName
     {
@@ -1819,12 +1819,12 @@ namespace GDMCHttp.Data
 
             if (includeUndergroundAir)
             {
-                isAir = (block == BlockName.cave_air) || (block == BlockName.void_air);
+                isAir = block == BlockName.cave_air || block == BlockName.void_air;
             }
 
             if (includeWater)
             {
-                isWater = (block == BlockName.water);
+                isWater = block == BlockName.water;
             }
 
             if (includePlants)
@@ -1837,7 +1837,7 @@ namespace GDMCHttp.Data
 
         public static bool IsAirBlock(BlockName block)
         {
-            return (block == BlockName.air) || (block == BlockName.cave_air) || (block == BlockName.void_air);
+            return block == BlockName.air || block == BlockName.cave_air || block == BlockName.void_air;
         }
 
         public static bool IsDoorBlock(BlockName block)

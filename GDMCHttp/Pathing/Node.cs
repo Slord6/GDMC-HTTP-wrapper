@@ -1,4 +1,5 @@
-﻿using GDMCHttp.Data;
+﻿using GDMCHttp.Data.Blocks;
+using GDMCHttp.Data.Position;
 using System;
 using System.Collections.Generic;
 using System.Text;

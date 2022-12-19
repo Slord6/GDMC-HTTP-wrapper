@@ -1,6 +1,7 @@
 ﻿using GDMCHttp;
 using GDMCHttp.Commands;
-using GDMCHttp.Data;
+using GDMCHttp.Data.Blocks;
+using GDMCHttp.Data.Position;
 using GDMCHttp.Pathing;
 using System.Linq;
 

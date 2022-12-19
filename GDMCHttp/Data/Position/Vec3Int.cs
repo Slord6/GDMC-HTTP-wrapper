@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 
-namespace GDMCHttp.Data
+namespace GDMCHttp.Data.Position
 {
     public class Vec3Int
     {
@@ -47,12 +47,12 @@ namespace GDMCHttp.Data
 
         public static Vec3Int operator +(Vec3Int a, Vec3Int b)
         {
-            return Vec3Int.Add(a, b);
+            return Add(a, b);
         }
 
         public static Vec3Int operator -(Vec3Int a, Vec3Int b)
         {
-            return Vec3Int.Sub(a, b);
+            return Sub(a, b);
         }
 
         public override int GetHashCode()
@@ -106,7 +106,7 @@ namespace GDMCHttp.Data
 
         public static Vec3Int Min(Vec3Int a, Vec3Int b)
         {
-            Vec3Int max = Vec3Int.Max(a, b);
+            Vec3Int max = Max(a, b);
             if (a == max) return b;
             return a;
         }
@@ -127,7 +127,7 @@ namespace GDMCHttp.Data
                     {
                         if (x == 0 && y == 0 && z == 0) continue;
                         Vec3Int offset = new Vec3Int(x, y, z);
-                        neighbours.Add(Vec3Int.Add(pos, offset));
+                        neighbours.Add(Add(pos, offset));
                     }
                 }
             }
@@ -148,7 +148,7 @@ namespace GDMCHttp.Data
                         if (x == 0 || z == 0)
                         {
                             Vec3Int offset = new Vec3Int(x, y, z);
-                            neighbours.Add(Vec3Int.Add(pos, offset));
+                            neighbours.Add(Add(pos, offset));
                         }
                     }
                 }
@@ -180,7 +180,7 @@ namespace GDMCHttp.Data
 
         public static int TaxiCabDistance(Vec3Int a, Vec3Int b)
         {
-            Vec3Int diff = Vec3Int.Sub(b, a);
+            Vec3Int diff = Sub(b, a);
             return Math.Abs(diff.x) + Math.Abs(diff.y) + Math.Abs(diff.z);
         }
 
@@ -209,7 +209,7 @@ namespace GDMCHttp.Data
         public static Vec3Int Parse(string value)
         {
             Vec3Int position;
-            if(!TryParse(value, out position))
+            if (!TryParse(value, out position))
             {
                 throw new ArgumentException(value + " is not a valid Vec3Int representation");
             }

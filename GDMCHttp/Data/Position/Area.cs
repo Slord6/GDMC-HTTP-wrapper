@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace GDMCHttp.Data
+namespace GDMCHttp.Data.Position
 {
     public class Area
     {

@@ -1,9 +1,10 @@
-﻿using System;
+﻿using GDMCHttp.Data.Position;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 
-namespace GDMCHttp.Data
+namespace GDMCHttp.Data.Blocks
 {
     public class Block
     {
@@ -19,7 +20,7 @@ namespace GDMCHttp.Data
 
         public Block(BlockName name, Vec3Int position)
         {
-            this.properties = new BlockProperties(name, position);
+            properties = new BlockProperties(name, position);
         }
 
         /// <summary>
@@ -29,7 +30,7 @@ namespace GDMCHttp.Data
         /// <param name="position"></param>
         public Block(string rawString)
         {
-            this.properties = new BlockProperties(rawString);
+            properties = new BlockProperties(rawString);
         }
 
         public Block(BlockProperties properties)
@@ -40,7 +41,7 @@ namespace GDMCHttp.Data
         public override string ToString()
         {
             string fullName = NamespacedName;
-            if(BlockProperties != null)
+            if (BlockProperties != null)
             {
                 fullName += BlockProperties.ToString();
             }

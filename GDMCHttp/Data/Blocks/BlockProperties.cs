@@ -1,10 +1,11 @@
-﻿using System;
+﻿using GDMCHttp.Data.Position;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Text;
 using System.Text.RegularExpressions;
 
-namespace GDMCHttp.Data
+namespace GDMCHttp.Data.Blocks
 {
     public class BlockProperties
     {
@@ -31,7 +32,7 @@ namespace GDMCHttp.Data
         {
             this.name = name;
             this.properties = properties;
-            this.blockStatesString = blockStates;
+            blockStatesString = blockStates;
             this.position = position;
         }
 
@@ -39,7 +40,7 @@ namespace GDMCHttp.Data
         {
         }
 
-        public BlockProperties(BlockName name, Vec3Int position, BlockProperties otherProperties): this(name, otherProperties.properties, otherProperties.blockStatesString, position)
+        public BlockProperties(BlockName name, Vec3Int position, BlockProperties otherProperties) : this(name, otherProperties.properties, otherProperties.blockStatesString, position)
         {
 
         }
@@ -61,15 +62,15 @@ namespace GDMCHttp.Data
             SetName(match.Groups[4].Value);
             // 6 = property=value,property2=value2...
             string propertiesString = match.Groups[6].Value;
-            this.properties = PropertiesFromString(propertiesString);
+            properties = PropertiesFromString(propertiesString);
             // 7 = blockstates
             string blockstates = match.Groups[7].Value;
-            this.blockStatesString = blockstates;
+            blockStatesString = blockstates;
         }
 
         public void SetProperty(BlockProperty key, string value)
         {
-            if(Properties.ContainsKey(key))
+            if (Properties.ContainsKey(key))
             {
                 Properties[key] = value;
             }
@@ -81,7 +82,7 @@ namespace GDMCHttp.Data
 
         public string GetProperty(BlockProperty key)
         {
-            if(Properties.ContainsKey(key))
+            if (Properties.ContainsKey(key))
             {
                 return Properties[key];
             }
@@ -96,7 +97,7 @@ namespace GDMCHttp.Data
         {
             string baseName = fullName.Split(':')[1];
 
-            if (!Enum.TryParse<BlockName>(baseName, out name))
+            if (!Enum.TryParse(baseName, out name))
             {
                 name = BlockName.UNKNOWN;
                 Debug.WriteLine(fullName + " is unknown ");
@@ -113,7 +114,7 @@ namespace GDMCHttp.Data
             {
                 string[] splitPair = pairs[i].Split(new char[] { '=' });
                 BlockProperty blockProperty;
-                if (Enum.TryParse<BlockProperty>(splitPair[0], out blockProperty))
+                if (Enum.TryParse(splitPair[0], out blockProperty))
                 {
                     parsedPairs.Add(blockProperty, splitPair[1]);
                 }

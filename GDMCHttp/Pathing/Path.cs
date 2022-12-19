@@ -1,7 +1,8 @@
-﻿using GDMCHttp.Data;
-using System.Linq;
+﻿using System.Linq;
 using System.Collections.Generic;
 using System.Text;
+using GDMCHttp.Data.Blocks;
+using GDMCHttp.Data.Position;
 
 namespace GDMCHttp.Pathing
 {
