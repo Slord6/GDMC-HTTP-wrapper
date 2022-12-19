@@ -171,6 +171,15 @@ namespace GDMCHttp
         }
 
         /// <summary>
+        /// Get all blocks in the cache
+        /// </summary>
+        /// <returns></returns>
+        public Block[] GetBlocks()
+        {
+            return new List<Block>(blockCache).ToArray();
+        }
+
+        /// <summary>
         /// Get all blocks in the cache of the given type
         /// </summary>
         /// <param name="name">Block type to find</param>

@@ -21,36 +21,14 @@ world.ReplaceBlock(pathBlock, BlockName.stone, false);
 world.Flush();
 
 
-Block[,] heightmap = world.CalculateHeightMap();
-Block[] doors = world.GetBlocks(BlockName.oak_door);
-
-for (int i = 0; i < doors.Length; i++)
+Block[] paths = GDMCHttp.Pathing.Path.PathJoin(world, (Block b) =>
 {
-    for (int j = 0; j < doors.Length; j++)
-    {
-        if (i == j) continue;
-        if (doors[i].BlockProperties.Properties[BlockProperty.half] == "upper"
-            || doors[j].BlockProperties.Properties[BlockProperty.half] == "upper") continue;
-        Vec3Int downOne = new Vec3Int(0, -1, 0);
-        Block belowDoorOne = world.GetBlock(doors[i].Position + downOne);
-        Block belowDoorTwo = world.GetBlock(doors[j].Position + downOne);
+    return b.Name == BlockName.oak_door && b.BlockProperties.Properties[BlockProperty.half] != "upper";
+}, false);
 
-        GDMCHttp.Pathing.Path path = new GDMCHttp.Pathing.Path(belowDoorOne, belowDoorTwo, world, 1);
-        if (path.Route == null)
-        {
-            Console.WriteLine("No path (" + doors[i].Position + "->" + doors[j].Position + ")");
-            world.Flush();
-        }
-        else
-        {
-            Console.WriteLine("Path!(" + doors[i].Position + "->" + doors[j].Position + ")");
-            world.ReplaceBlocks(path.Route, pathBlock);
-            world.Flush();
-        }
-        break;
-    }
-}
+world.ReplaceBlocks(paths, BlockName.glass);
 
+world.Flush();
 
 
 announce("Client done", connection);

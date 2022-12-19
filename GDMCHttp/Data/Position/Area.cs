@@ -31,10 +31,31 @@ namespace GDMCHttp.Data.Position
             }
         }
 
+        public int Volume
+        {
+            get
+            {
+                Vec3Int size = Size;
+                return size.X * size.Y * size.Z;
+            }
+        }
+
         public Area(Vec3Int cornerA, Vec3Int cornerB)
         {
             CornerA = cornerA;
             CornerB = cornerB;
+        }
+
+        public bool CouldContain(Area other)
+        {
+            return other.Size.X <= Size.X
+                && other.Size.Y <= Size.Y
+                && other.Size.Z <= Size.Z;
+        }
+
+        public override string ToString()
+        {
+            return CornerA + "-->" + CornerB;
         }
     }
 }

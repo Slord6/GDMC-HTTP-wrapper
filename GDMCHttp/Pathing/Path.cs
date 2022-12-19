@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Text;
 using GDMCHttp.Data.Blocks;
 using GDMCHttp.Data.Position;
+using System;
 
 namespace GDMCHttp.Pathing
 {
@@ -26,7 +27,7 @@ namespace GDMCHttp.Pathing
         public Path(Block start, Block end, McWorld world, int flatnessPreference = 0)
         {
             Node pathEnd = Calculate(start, end, world, flatnessPreference);
-            if(pathEnd == null)
+            if (pathEnd == null)
             {
                 route = null;
             }
@@ -87,7 +88,7 @@ namespace GDMCHttp.Pathing
             {
                 int lowest = openSet.Min(n => n.TotalScore);
                 Node current = openSet.First(n => n.TotalScore == lowest);
-                
+
                 visited.Add(current);
                 openSet.Remove(current);
 
@@ -120,6 +121,58 @@ namespace GDMCHttp.Pathing
                 }
             }
             return null;
+        }
+
+        /// <summary>
+        /// Join a group of blocks by paths
+        /// </summary>
+        /// <param name="world">The world</param>
+        /// <param name="BlockShouldJoin">Function that returns true if the given block should be pathed to others</param>
+        /// <param name="oneToAll">If true, the first block is pathed to the others, if false each block is pathed to every other block</param>
+        /// <returns>All unique blocks in the joined paths</returns>
+        public static Block[] PathJoin(McWorld world, Func<Block, bool> BlockShouldJoin, bool oneToAll = true)
+        {
+            Block[] joiners = FilterBlocks(world.GetBlocks(), BlockShouldJoin);
+            List<Path> paths = new List<Path>();
+            Vec3Int downOne = new Vec3Int(0, -1, 0);
+            for (int i = 0; i < joiners.Length; i++)
+            {
+                for (int j = 0; j < joiners.Length; j++)
+                {
+                    Block belowOne = world.GetBlock(joiners[i].Position + downOne);
+                    Block belowTwo = world.GetBlock(joiners[j].Position + downOne);
+
+                    Path path = new Path(belowOne, belowTwo, world, 1);
+                    if (path.Route == null)
+                    {
+                        continue;
+                    }
+                    else
+                    {
+                        paths.Add(path);
+                    }
+                }
+                if (oneToAll) break;
+            }
+
+            Block[] pathBlocks = paths.SelectMany(path => path.Route).Distinct().ToArray();
+            return pathBlocks;
+        }
+
+        /// <summary>
+        /// Filter a selection of blocks with the given function
+        /// </summary>
+        /// <param name="selection">Blocks to filter</param>
+        /// <param name="Filter">The filter function, returns true if the block passes the filter</param>
+        /// <returns>Filtered blocks</returns>
+        public static Block[] FilterBlocks(Block[] selection, Func<Block, bool> Filter)
+        {
+            List<Block> passed = new List<Block>();
+            for (int i = 0; i < selection.Length; i++)
+            {
+                if (Filter(selection[i])) passed.Add(selection[i]);
+            }
+            return passed.ToArray();
         }
     }
 }

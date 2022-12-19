@@ -27,6 +27,9 @@ namespace GDMCHttp.Data.Position
             return $"{x} {y} {z}";
         }
 
+        public static Vec3Int Zero { get => new Vec3Int(0, 0, 0); }
+        public static Vec3Int One { get => new Vec3Int(1, 1, 1); }
+
         public override bool Equals(object obj)
         {
             if (obj.GetType() != typeof(Vec3Int)) return false;
@@ -38,6 +41,11 @@ namespace GDMCHttp.Data.Position
         public static bool operator ==(Vec3Int a, Vec3Int b)
         {
             return a.x == b.x && a.y == b.y && a.z == b.z;
+        }
+
+        public static Vec3Int operator *(Vec3Int a, int amount)
+        {
+            return new Vec3Int(a.x * amount, a.y * amount, a.z * amount);
         }
 
         public static bool operator !=(Vec3Int a, Vec3Int b)
