@@ -12,11 +12,11 @@ namespace GDMCHttp.Pathing
             get
             {
                 if (Parent == null) return 0;
-                int distance = Parent.DistanceFromStart + flatnessPreference;
+                int distance = Parent.DistanceFromStart + 1;
 
                 // We add a little extra if we have to change heights to favour flat routes
                 // The value here is how many blocks we're willing to walk to avoid a height change
-                if (Parent.Block.Position.Y != Block.Position.Y) distance += 1;
+                if (Parent.Block.Position.Y != Block.Position.Y) distance += flatnessPreference;
 
                 return distance;
             }

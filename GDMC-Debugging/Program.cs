@@ -12,17 +12,30 @@ Func<string, Connection, string> announce = (string msg, Connection connection) 
 Connection connection = new Connection();
 announce("Client connected", connection);
 
+BlockName pathBlock = BlockName.glass;
+
 McWorld world = new McWorld(connection);
 world.RefreshCache();
-
-
-Block existing = world.GetBlock(BlockName.oak_wall_sign);
-Sign sign = new Sign(BlockName.oak_wall_sign, new string[] { "Four", "three", "two", "one!" }, existing.Position);
-sign.Facing = BlockProperty.north;
-
-Console.WriteLine(sign.ToString());
-world.ReplaceBlock(existing, sign);
-
+world.ReplaceBlock(pathBlock, BlockName.stone, false);
 world.Flush();
+
+
+Block[,] heightmap = world.CalculateHeightMap();
+Block start = heightmap[0, 0];
+Block end = heightmap[20,25];
+GDMCHttp.Pathing.Path path = new GDMCHttp.Pathing.Path(start, end, world, -4);
+if (path.Route == null)
+{
+    Console.WriteLine("No path");
+    world.ReplaceBlock(start, new Block(pathBlock, start.Position));
+    world.ReplaceBlock(end, new Block(pathBlock, end.Position));
+    world.Flush();
+}
+else
+{
+    world.ReplaceBlocks(path.Route, pathBlock);
+    world.Flush();
+}
+
 
 announce("Client done", connection);

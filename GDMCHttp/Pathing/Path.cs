@@ -13,9 +13,18 @@ namespace GDMCHttp.Pathing
             get => route;
         }
 
-        public Path(Block start, Block end, McWorld world)
+        /// <summary>
+        /// Create a new path between two blocks
+        /// </summary>
+        /// <param name="start">Starting block</param>
+        /// <param name="end">Ending block</param>
+        /// <param name="world">McWorld to query for additional information</param>
+        /// <param name="flatnessPreference">Preference for flatness, equal to how many blocks out-of-the-way to go to avoid/prefer a height change
+        /// 0 means height changes have no effect, negative values will use hills and positive values will avoid them
+        /// </param>
+        public Path(Block start, Block end, McWorld world, int flatnessPreference = 0)
         {
-            Node pathEnd = Calculate(start, end, world);
+            Node pathEnd = Calculate(start, end, world, flatnessPreference);
             if(pathEnd == null)
             {
                 route = null;
@@ -52,7 +61,8 @@ namespace GDMCHttp.Pathing
                 {
                     airAbove = true;
                     break;
-                } else if (!BlockCategories.IsAirBlock(above.Name))
+                }
+                else if (!BlockCategories.IsAirBlock(above.Name))
                 {
                     airAbove = false;
                     break;
@@ -62,10 +72,10 @@ namespace GDMCHttp.Pathing
             return airAbove;
         }
 
-        public Node Calculate(Block start, Block end, McWorld world)
+        public Node Calculate(Block start, Block end, McWorld world, int flatnessPreference)
         {
             List<Node> openSet = new List<Node>();
-            openSet.Add(new Node(start));
+            openSet.Add(new Node(start, flatnessPreference));
             HashSet<Node> visited = new HashSet<Node>();
 
             while (openSet.Count > 0)
@@ -85,7 +95,7 @@ namespace GDMCHttp.Pathing
 
                 for (int i = 0; i < neighbours.Length; i++)
                 {
-                    Node neighbour = new Node(neighbours[i]);
+                    Node neighbour = new Node(neighbours[i], flatnessPreference);
                     neighbour.Parent = current;
                     if (visited.Contains(neighbour)) continue;
                     neighbour.EstimatedDistanceToEnd = neighbour.DistanceTo(end.Position);
@@ -103,10 +113,6 @@ namespace GDMCHttp.Pathing
                         }
                     }
                 }
-                //world.ReplaceBlocks(visited.Select(n => n.Block).ToArray(), BlockName.gold_block);
-                //world.ReplaceBlocks(openSet.Select(n => n.Block).ToArray(), BlockName.diamond_block);
-                //world.Flush();
-                System.Console.Write(".");
             }
             return null;
         }

@@ -227,7 +227,7 @@ namespace GDMCHttp
                     for (int y = size.Y - 1; y >= 0; y--)
                     {
                         Block current = dimensional[x, y, z];
-                        if (!BlockCategories.IsGroundBlock(current.Name, false, waterIsGround, false)) continue;
+                        if (!BlockCategories.IsSolidBlock(current.Name)) continue;
                         heighest = current;
                         break;
                     }
