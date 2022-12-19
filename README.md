@@ -11,7 +11,10 @@ There is some additional functionality available throught the `McWorld` class wh
 
 ## GDMC HTTP Server Supported Versions
 
-- [v0.6.2](https://github.com/Niels-NTG/gdmc_http_interface/releases/tag/v0.6.2)
+Last version tested against:
+- [v0.6.4](https://github.com/Niels-NTG/gdmc_http_interface/releases/tag/v0.6.4)
+
+The client may work with newer versions, as long as there have been no breaking changes,
 
 ## Limitations
 
