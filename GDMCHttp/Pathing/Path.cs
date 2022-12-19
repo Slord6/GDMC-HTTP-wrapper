@@ -48,28 +48,32 @@ namespace GDMCHttp.Pathing
 
         private bool IsWalkableBlock(Block block, McWorld world)
         {
-            bool isGround = BlockCategories.IsSolidBlock(block.Name);
-            if (!isGround) return false;
+            bool isSolid = BlockCategories.IsSolidBlock(block.Name);
+            if (!isSolid) return false;
 
+            bool isTooTall = BlockCategories.IsTallerThanOneBlock(block.Name);
+            if (isTooTall) return false;
 
-            bool airAbove = true;
+            bool walkableAbove = true;
             for (int y = 1; y <= 2; y++)
             {
                 Vec3Int offset = new Vec3Int(0, y, 0);
                 Block above = world.GetBlock(block.Position + offset);
                 if (above == null)
                 {
-                    airAbove = true;
+                    walkableAbove = true;
                     break;
                 }
-                else if (!BlockCategories.IsAirBlock(above.Name))
+                else if (!BlockCategories.IsAirBlock(above.Name)
+                    && !BlockCategories.IsDoorBlock(above.Name)
+                    && !BlockCategories.IsGateBlock(above.Name))
                 {
-                    airAbove = false;
+                    walkableAbove = false;
                     break;
                 }
             }
 
-            return airAbove;
+            return walkableAbove;
         }
 
         public Node Calculate(Block start, Block end, McWorld world, int flatnessPreference)

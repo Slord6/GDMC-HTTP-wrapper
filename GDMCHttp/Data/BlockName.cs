@@ -1839,5 +1839,79 @@ namespace GDMCHttp.Data
         {
             return (block == BlockName.air) || (block == BlockName.cave_air) || (block == BlockName.void_air);
         }
+
+        public static bool IsDoorBlock(BlockName block)
+        {
+            return block.ToString().ToLower().Contains("door");
+        }
+
+        public static bool IsGateBlock(BlockName block)
+        {
+            BlockName[] gates = new BlockName[]
+            {
+                BlockName.oak_fence_gate,
+                BlockName.spruce_fence_gate,
+                BlockName.birch_fence_gate,
+                BlockName.jungle_fence_gate,
+                BlockName.acacia_fence_gate,
+                BlockName.dark_oak_fence_gate,
+                BlockName.mangrove_fence_gate,
+                BlockName.crimson_fence_gate,
+                BlockName.warped_fence_gate
+            };
+            return gates.Contains(block);
+        }
+
+        public static bool IsFenceBlock(BlockName block)
+        {
+            BlockName[] fences = new BlockName[]
+            {
+                BlockName.oak_fence,
+                BlockName.spruce_fence,
+                BlockName.birch_fence,
+                BlockName.jungle_fence,
+                BlockName.acacia_fence,
+                BlockName.dark_oak_fence,
+                BlockName.mangrove_fence,
+                BlockName.crimson_fence,
+                BlockName.warped_fence
+            };
+            return fences.Contains(block);
+        }
+
+        public static bool IsWallBlock(BlockName block)
+        {
+            BlockName[] walls = new BlockName[]
+            {
+                BlockName.cobblestone_wall,
+                BlockName.mossy_cobblestone_wall,
+                BlockName.brick_wall,
+                BlockName.prismarine_wall,
+                BlockName.red_sandstone_wall,
+                BlockName.mossy_stone_brick_wall,
+                BlockName.granite_wall,
+                BlockName.stone_brick_wall,
+                BlockName.mud_brick_wall,
+                BlockName.nether_brick_wall,
+                BlockName.andesite_wall,
+                BlockName.red_nether_brick_wall,
+                BlockName.sandstone_wall,
+                BlockName.end_stone_brick_wall,
+                BlockName.diorite_wall,
+                BlockName.blackstone_wall,
+                BlockName.polished_blackstone_wall,
+                BlockName.polished_blackstone_brick_wall,
+                BlockName.cobbled_deepslate_wall,
+                BlockName.polished_deepslate_wall,
+                BlockName.deepslate_brick_wall,
+                BlockName.deepslate_tile_wall
+            };
+            return walls.Contains(block);
+        }
+
+        public static bool IsTallerThanOneBlock(BlockName block)
+        {
+            return IsFenceBlock(block) || IsGateBlock(block) || IsWallBlock(block);
+        }
     }
 }

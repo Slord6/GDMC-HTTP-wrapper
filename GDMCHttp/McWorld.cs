@@ -168,6 +168,21 @@ namespace GDMCHttp
             return null;
         }
 
+        /// <summary>
+        /// Get all blocks in the cache of the given type
+        /// </summary>
+        /// <param name="name">Block type to find</param>
+        /// <returns></returns>
+        public Block[] GetBlocks(BlockName name)
+        {
+            List<Block> found = new List<Block>();
+            for (int i = 0; i < blockCache.Length; i++)
+            {
+                if (blockCache[i].Name == name) found.Add(blockCache[i]);
+            }
+            return found.ToArray();
+        }
+
         public Block[] GetNeighbours(Block block)
         {
             return GetNeighbours(block.Position, Vec3Int.Neighbours);

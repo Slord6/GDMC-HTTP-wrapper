@@ -21,21 +21,35 @@ world.Flush();
 
 
 Block[,] heightmap = world.CalculateHeightMap();
-Block start = heightmap[0, 0];
-Block end = heightmap[20,25];
-GDMCHttp.Pathing.Path path = new GDMCHttp.Pathing.Path(start, end, world, -4);
-if (path.Route == null)
+Block[] doors = world.GetBlocks(BlockName.oak_door);
+
+for (int i = 0; i < doors.Length; i++)
 {
-    Console.WriteLine("No path");
-    world.ReplaceBlock(start, new Block(pathBlock, start.Position));
-    world.ReplaceBlock(end, new Block(pathBlock, end.Position));
-    world.Flush();
+    for (int j = 0; j < doors.Length; j++)
+    {
+        if (i == j) continue;
+        if (doors[i].BlockProperties.Properties[BlockProperty.half] == "upper"
+            || doors[j].BlockProperties.Properties[BlockProperty.half] == "upper") continue;
+        Vec3Int downOne = new Vec3Int(0, -1, 0);
+        Block belowDoorOne = world.GetBlock(doors[i].Position + downOne);
+        Block belowDoorTwo = world.GetBlock(doors[j].Position + downOne);
+
+        GDMCHttp.Pathing.Path path = new GDMCHttp.Pathing.Path(belowDoorOne, belowDoorTwo, world, 1);
+        if (path.Route == null)
+        {
+            Console.WriteLine("No path (" + doors[i].Position + "->" + doors[j].Position + ")");
+            world.Flush();
+        }
+        else
+        {
+            Console.WriteLine("Path!(" + doors[i].Position + "->" + doors[j].Position + ")");
+            world.ReplaceBlocks(path.Route, pathBlock);
+            world.Flush();
+        }
+        break;
+    }
 }
-else
-{
-    world.ReplaceBlocks(path.Route, pathBlock);
-    world.Flush();
-}
+
 
 
 announce("Client done", connection);
