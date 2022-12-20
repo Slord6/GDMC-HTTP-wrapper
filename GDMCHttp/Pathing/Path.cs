@@ -19,14 +19,14 @@ namespace GDMCHttp.Pathing
         /// Create a new path between two blocks
         /// </summary>
         /// <param name="start">Starting block</param>
-        /// <param name="end">Ending block</param>
+        /// <param name="ends">Valid ending blocks</param>
         /// <param name="world">McWorld to query for additional information</param>
         /// <param name="flatnessPreference">Preference for flatness, equal to how many blocks out-of-the-way to go to avoid/prefer a height change
         /// 0 means height changes have no effect, negative values will use hills and positive values will avoid them
         /// </param>
-        public Path(Block start, Block end, McWorld world, int flatnessPreference = 0)
+        public Path(Block start, Block[] ends, McWorld world, int flatnessPreference = 0)
         {
-            Node pathEnd = Calculate(start, end, world, flatnessPreference);
+            Node pathEnd = Calculate(start, ends, world, flatnessPreference);
             if (pathEnd == null)
             {
                 route = null;
@@ -35,6 +35,20 @@ namespace GDMCHttp.Pathing
             {
                 route = CompletedPathNodeToBlocks(pathEnd);
             }
+        }
+
+        /// <summary>
+        /// Create a new path between two blocks
+        /// </summary>
+        /// <param name="start">Starting block</param>
+        /// <param name="end">End block</param>
+        /// <param name="world">McWorld to query for additional information</param>
+        /// <param name="flatnessPreference">Preference for flatness, equal to how many blocks out-of-the-way to go to avoid/prefer a height change
+        /// 0 means height changes have no effect, negative values will use hills and positive values will avoid them
+        /// </param>
+        public Path(Block start, Block end, McWorld world, int flatnessPreference = 0) : this(start, new Block[] { end }, world, flatnessPreference)
+        {
+
         }
 
         public Block[] CompletedPathNodeToBlocks(Node node)
@@ -78,8 +92,9 @@ namespace GDMCHttp.Pathing
             return walkableAbove;
         }
 
-        public Node Calculate(Block start, Block end, McWorld world, int flatnessPreference)
+        private Node Calculate(Block start, Block[] ends, McWorld world, int flatnessPreference)
         {
+            IEnumerable<Vec3Int> endPositions = ends.Select(b => b.Position);
             List<Node> openSet = new List<Node>();
             openSet.Add(new Node(start, flatnessPreference));
             HashSet<Node> visited = new HashSet<Node>();
@@ -92,8 +107,9 @@ namespace GDMCHttp.Pathing
                 visited.Add(current);
                 openSet.Remove(current);
 
-                if (current.Block.Position == end.Position)
+                if (endPositions.Contains(current.Block.Position))
                 {
+                    Console.WriteLine($"Path calculated (finishing at a {current.Block.Name})");
                     return current;
                 }
 
@@ -104,7 +120,9 @@ namespace GDMCHttp.Pathing
                     Node neighbour = new Node(neighbours[i], flatnessPreference);
                     neighbour.Parent = current;
                     if (visited.Contains(neighbour)) continue;
-                    neighbour.EstimatedDistanceToEnd = neighbour.DistanceTo(end.Position);
+
+                    int lowestDistanceToEnd = ends.Select(block => neighbour.DistanceTo(block.Position)).Min();
+                    neighbour.EstimatedDistanceToEnd = lowestDistanceToEnd;
 
                     if (!openSet.Contains(neighbour))
                     {
@@ -129,11 +147,13 @@ namespace GDMCHttp.Pathing
         /// <param name="world">The world</param>
         /// <param name="BlockShouldJoin">Function that returns true if the given block should be pathed to others</param>
         /// <param name="oneToAll">If true, the first block is pathed to the others, if false each block is pathed to every other block</param>
+        /// <param name="individualPaths">If true an entire path is calculated, if false, previously found paths are treated as end positions
+        /// which can be more performant and generate simpler paths</param>
         /// <returns>All unique blocks in the joined paths</returns>
-        public static Block[] PathJoin(McWorld world, Func<Block, bool> BlockShouldJoin, bool oneToAll = true)
+        public static Block[] PathJoin(McWorld world, Func<Block, bool> BlockShouldJoin, bool oneToAll = true, bool individualPaths = false)
         {
             Block[] joiners = FilterBlocks(world.GetBlocks(), BlockShouldJoin);
-            List<Path> paths = new List<Path>();
+            List<Block> foundPathBlocks = new List<Block>();
             Vec3Int downOne = new Vec3Int(0, -1, 0);
             for (int i = 0; i < joiners.Length; i++)
             {
@@ -142,20 +162,32 @@ namespace GDMCHttp.Pathing
                     Block belowOne = world.GetBlock(joiners[i].Position + downOne);
                     Block belowTwo = world.GetBlock(joiners[j].Position + downOne);
 
-                    Path path = new Path(belowOne, belowTwo, world, 1);
+                    Path path;
+                    if(individualPaths)
+                    {
+                        path = new Path(belowOne, belowTwo, world, 1);
+                    }
+                    else
+                    {
+                        List<Block> endPoints = new List<Block>(foundPathBlocks);
+                        endPoints.Add(belowTwo);
+
+                        path = new Path(belowOne, endPoints.ToArray(), world, 1);
+                    }
+                    
                     if (path.Route == null)
                     {
                         continue;
                     }
                     else
                     {
-                        paths.Add(path);
+                        foundPathBlocks.AddRange(path.Route);
                     }
                 }
                 if (oneToAll) break;
             }
 
-            Block[] pathBlocks = paths.SelectMany(path => path.Route).Distinct().ToArray();
+            Block[] pathBlocks = foundPathBlocks.Distinct().ToArray();
             return pathBlocks;
         }
 
