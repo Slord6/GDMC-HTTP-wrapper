@@ -15,6 +15,23 @@ namespace GDMCHttp
         private BiomePoint[] biomeCache;
         private List<Block> changedBlocks;
 
+        private Dictionary<Vec3Int, Block> blockPositionDict = null;
+        private Dictionary<Vec3Int, Block> BlockPositionDict
+        {
+            get
+            {
+                if(blockPositionDict == null)
+                {
+                    blockPositionDict = new Dictionary<Vec3Int, Block>();
+                    for (int i = 0; i < blockCache.Length; i++)
+                    {
+                        blockPositionDict.Add(blockCache[i].Position, blockCache[i]);
+                    }
+                }
+                return blockPositionDict;
+            }
+        }
+
         public McWorld(Connection connection)
         {
             this.Connection = connection;
@@ -30,6 +47,7 @@ namespace GDMCHttp
             blockCache = Connection.GetBlocksSync(BuildArea.CornerA, BuildArea.OffsetAToB);
             biomeCache = Connection.GetBiomesSync(BuildArea.CornerA, BuildArea.OffsetAToB);
             changedBlocks = new List<Block>();
+            blockPositionDict = null;
         }
 
         /// <summary>
@@ -60,6 +78,7 @@ namespace GDMCHttp
             if (index == -1) return false;
             blockCache[index] = newBlock;
             changedBlocks.Add(newBlock);
+            BlockPositionDict[newBlock.Position] = newBlock;
             return true;
         }
 
@@ -77,6 +96,7 @@ namespace GDMCHttp
                 {
                     blockCache[i] = newBlock;
                     changedBlocks.Add(blockCache[i]);
+                    BlockPositionDict[blockCache[i].Position] = newBlock;
                     return true;
                 }
             }
@@ -108,10 +128,12 @@ namespace GDMCHttp
                         blockCache[i] = new Block(newType, block.Position);
                     }
                     changedBlocks.Add(blockCache[i]);
+                    BlockPositionDict[blockCache[i].Position] = blockCache[i];
                     didReplacement = true;
                     if (firstOnly) break;
                 }
             }
+
             return didReplacement;
         }
 
@@ -149,6 +171,13 @@ namespace GDMCHttp
         /// <returns></returns>
         public Block GetBlock(Vec3Int position)
         {
+            if (BlockPositionDict.ContainsKey(position))
+            {
+                return BlockPositionDict[position];
+            } else
+            {
+                return null;
+            }
             for (int i = 0; i < blockCache.Length; i++)
             {
                 if (blockCache[i].Position == position) return blockCache[i];

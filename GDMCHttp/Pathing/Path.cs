@@ -109,7 +109,6 @@ namespace GDMCHttp.Pathing
 
                 if (endPositions.Contains(current.Block.Position))
                 {
-                    Console.WriteLine($"Path calculated (finishing at a {current.Block.Name})");
                     return current;
                 }
 
@@ -159,6 +158,7 @@ namespace GDMCHttp.Pathing
             {
                 for (int j = 0; j < joiners.Length; j++)
                 {
+                    if (i == j) continue;
                     Block belowOne = world.GetBlock(joiners[i].Position + downOne);
                     Block belowTwo = world.GetBlock(joiners[j].Position + downOne);
 
