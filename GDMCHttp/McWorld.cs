@@ -174,15 +174,11 @@ namespace GDMCHttp
             if (BlockPositionDict.ContainsKey(position))
             {
                 return BlockPositionDict[position];
-            } else
+            }
+            else
             {
                 return null;
             }
-            for (int i = 0; i < blockCache.Length; i++)
-            {
-                if (blockCache[i].Position == position) return blockCache[i];
-            }
-            return null;
         }
 
         /// <summary>
