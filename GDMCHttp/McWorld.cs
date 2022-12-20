@@ -231,7 +231,7 @@ namespace GDMCHttp
 
         public Block[] GetNeighboursOrthogonal(Block block)
         {
-            return GetNeighbours(block.Position, Vec3Int.NeighboursOrthogonal);
+            return GetNeighboursOrthogonal(block.Position);
         }
 
         public Block[] GetNeighboursOrthogonal(Vec3Int position)
