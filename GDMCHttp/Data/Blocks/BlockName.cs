@@ -958,7 +958,7 @@ namespace GDMCHttp.Data.Blocks
         }
 
 
-        private static HashSet<BlockName> PlantBlocks
+        public static HashSet<BlockName> PlantBlocks
         {
             get
             {
@@ -1736,11 +1736,12 @@ namespace GDMCHttp.Data.Blocks
 
             foreach (BlockName blockName in AllBlockNames)
             {
+                if (blockName == BlockName.grass_block) continue;
                 for (int i = 0; i < keyWords.Length; i++)
                 {
                     if (blockName.ToString().Contains(keyWords[i]))
                     {
-                        groundBlocks.Add(blockName);
+                        plantBlocks.Add(blockName);
                         break;
                     }
                 }

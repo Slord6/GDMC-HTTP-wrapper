@@ -3,7 +3,7 @@ using GDMCHttp.Commands;
 using GDMCHttp.Data.Blocks;
 using GDMCHttp.Data.Blocks.Structures;
 using GDMCHttp.Data.Position;
-using GDMCHttp.Pathing;
+using GDMCHttp.Analysis;
 using System.Linq;
 
 Connection connection = new Connection();
@@ -21,24 +21,25 @@ announce("Loading world cache");
 McWorld world = new McWorld(connection);
 announce("Cache loaded");
 
-announce("Loading structure");
-Structure hut = Structure.ReadFromXmlFile("./hut.xml");
+Surveyor surveyor = new Surveyor(world);
 
-hut.MoveTo(world.BuildArea.CornerA);
+announce("Painting world...");
+surveyor.PaintHeightLandscape();
+world.Flush();
+announce("Painted.");
 
-int hutCount = 5;
-Structure[] huts = new Structure[hutCount];
-Vec3Int offset = new Vec3Int(0, 0, 15);
-for (int i = 0; i < hutCount; i++)
+announce("Selecting good plots");
+Block[][] plots = surveyor.BuildablePlots();
+
+for (int i = 0; i < plots.Length; i++)
 {
-    Vec3Int hutOffset =  offset * (i + 1);
-    huts[i] = new Structure(hut);
-    huts[i].Translate(hutOffset);
+    world.ReplaceBlocks(plots[i], BlockName.lapis_block);
 }
-
-world.PushStructures(huts, true);
 
 world.Flush();
 
-
 announce("Client done");
+
+announce("Restoring...");
+world.Restore();
+announce("Restored");

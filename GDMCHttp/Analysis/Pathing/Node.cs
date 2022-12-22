@@ -4,7 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.Text;
 
-namespace GDMCHttp.Pathing
+namespace GDMCHttp.Analysis.Pathing
 {
     public class Node
     {

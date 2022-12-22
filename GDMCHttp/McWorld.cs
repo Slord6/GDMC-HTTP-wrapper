@@ -33,10 +33,13 @@ namespace GDMCHttp
             }
         }
 
+        private Block[] originalState;
+
         public McWorld(Connection connection)
         {
             this.Connection = connection;
             RefreshCache();
+            originalState = GetBlocks();
         }
 
         /// <summary>
@@ -260,36 +263,6 @@ namespace GDMCHttp
         }
 
         /// <summary>
-        /// Calculate the heightmap for the cached area
-        /// </summary>
-        /// <param name="waterIsGround">Should water blocks be counted as ground</param>
-        /// <returns>The 2D block array of the heighest solid blocks in the cache area, (x,z).
-        /// Null values mean there were no solid blocks in that column in the cache
-        /// </returns>
-        public Block[,] CalculateHeightMap(bool waterIsGround = false)
-        {
-            Block[,,] dimensional = DimensionalRepresentation();
-            Vec3Int size = BuildArea.Size;
-            Block[,] heightmap = new Block[size.X, size.Z];
-            for (int x = 0; x < size.X; x++)
-            {
-                for (int z = 0; z < size.Z; z++)
-                {
-                    Block heighest = null;
-                    for (int y = size.Y - 1; y >= 0; y--)
-                    {
-                        Block current = dimensional[x, y, z];
-                        if (!BlockCategories.IsSolidBlock(current.Name)) continue;
-                        heighest = current;
-                        break;
-                    }
-                    heightmap[x, z] = heighest;
-                }
-            }
-            return heightmap;
-        }
-
-        /// <summary>
         /// Arrange the cache into an x,y,z array
         /// </summary>
         /// <returns>Cache blocks</returns>
@@ -357,6 +330,17 @@ namespace GDMCHttp
             {
                 RefreshCache();
             }
+        }
+
+
+        /// <summary>
+        /// Restore the remote world to as it was when this instance was created
+        /// Pushes the entire original cache and then refreshes
+        /// </summary>
+        public void Restore()
+        {
+            Connection.SetBlocksSync(originalState);
+            RefreshCache();
         }
     }
 }

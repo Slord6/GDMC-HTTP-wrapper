@@ -5,7 +5,7 @@ using GDMCHttp.Data.Blocks;
 using GDMCHttp.Data.Position;
 using System;
 
-namespace GDMCHttp.Pathing
+namespace GDMCHttp.Analysis.Pathing
 {
     public class Path
     {
