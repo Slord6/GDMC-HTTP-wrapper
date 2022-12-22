@@ -7,24 +7,27 @@ namespace GDMCHttp.Data.Position
 {
     public class Vec3Int
     {
-        private int x;
-        private int y;
-        private int z;
+        public int X { get; set; }
+        public int Y { get; set; }
+        public int Z { get; set; }
 
-        public int Y { get => y; }
-        public int X { get => x; }
-        public int Z { get => z; }
+        public Vec3Int() : this(0,0,0) { }
 
         public Vec3Int(int x, int y, int z)
         {
-            this.x = x;
-            this.y = y;
-            this.z = z;
+            this.X = x;
+            this.Y = y;
+            this.Z = z;
+        }
+
+        public Vec3Int ToAbsolute()
+        {
+            return Vec3Int.AbsoluteDifference(Vec3Int.Zero, this);
         }
 
         public override string ToString()
         {
-            return $"{x} {y} {z}";
+            return $"{X} {Y} {Z}";
         }
 
         public static Vec3Int Zero { get => new Vec3Int(0, 0, 0); }
@@ -40,12 +43,21 @@ namespace GDMCHttp.Data.Position
 
         public static bool operator ==(Vec3Int a, Vec3Int b)
         {
-            return a.x == b.x && a.y == b.y && a.z == b.z;
+            if (a is null)
+            {
+                return b is null;
+            }
+            return a.X == b.X && a.Y == b.Y && a.Z == b.Z;
         }
 
         public static Vec3Int operator *(Vec3Int a, int amount)
         {
-            return new Vec3Int(a.x * amount, a.y * amount, a.z * amount);
+            return new Vec3Int(a.X * amount, a.Y * amount, a.Z * amount);
+        }
+
+        public static Vec3Int operator /(Vec3Int a, int amount)
+        {
+            return new Vec3Int(a.X / amount, a.Y / amount, a.Z / amount);
         }
 
         public static bool operator !=(Vec3Int a, Vec3Int b)
@@ -81,7 +93,7 @@ namespace GDMCHttp.Data.Position
         /// <returns>Maximised Vec3Int</returns>
         public static Vec3Int MergeToMax(Vec3Int a, Vec3Int b)
         {
-            return new Vec3Int(Math.Max(a.x, b.x), Math.Max(a.y, b.y), Math.Max(a.z, b.z));
+            return new Vec3Int(Math.Max(a.X, b.X), Math.Max(a.Y, b.Y), Math.Max(a.Z, b.Z));
         }
 
         /// <summary>
@@ -92,7 +104,7 @@ namespace GDMCHttp.Data.Position
         /// <returns>Minimised Vec3Int</returns>
         public static Vec3Int MergeToMin(Vec3Int a, Vec3Int b)
         {
-            return new Vec3Int(Math.Min(a.x, b.x), Math.Min(a.y, b.y), Math.Min(a.z, b.z));
+            return new Vec3Int(Math.Min(a.X, b.X), Math.Min(a.Y, b.Y), Math.Min(a.Z, b.Z));
         }
 
         public static Vec3Int AbsoluteDifference(Vec3Int a, Vec3Int b)
@@ -100,7 +112,7 @@ namespace GDMCHttp.Data.Position
             Vec3Int min = MergeToMin(a, b);
             Vec3Int max = MergeToMax(a, b);
 
-            return new Vec3Int(max.x - min.x, max.y - min.y, max.z - min.z);
+            return new Vec3Int(max.X - min.X, max.Y - min.Y, max.Z - min.Z);
         }
 
         public static Vec3Int Max(Vec3Int a, Vec3Int b)
@@ -172,7 +184,7 @@ namespace GDMCHttp.Data.Position
         /// <returns></returns>
         public static Vec3Int Add(Vec3Int a, Vec3Int b)
         {
-            return new Vec3Int(a.x + b.x, a.y + b.y, a.z + b.z);
+            return new Vec3Int(a.X + b.X, a.Y + b.Y, a.Z + b.Z);
         }
 
         /// <summary>
@@ -183,13 +195,13 @@ namespace GDMCHttp.Data.Position
         /// <returns></returns>
         public static Vec3Int Sub(Vec3Int a, Vec3Int b)
         {
-            return new Vec3Int(a.x - b.x, a.y - b.y, a.z - b.z);
+            return new Vec3Int(a.X - b.X, a.Y - b.Y, a.Z - b.Z);
         }
 
         public static int TaxiCabDistance(Vec3Int a, Vec3Int b)
         {
             Vec3Int diff = Sub(b, a);
-            return Math.Abs(diff.x) + Math.Abs(diff.y) + Math.Abs(diff.z);
+            return Math.Abs(diff.X) + Math.Abs(diff.Y) + Math.Abs(diff.Z);
         }
 
         public static bool TryParse(string value, out Vec3Int position)

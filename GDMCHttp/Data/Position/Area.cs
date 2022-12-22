@@ -4,6 +4,7 @@ using System.Text;
 
 namespace GDMCHttp.Data.Position
 {
+    [Serializable]
     public class Area
     {
         public Vec3Int CornerA { get; set; }
@@ -30,6 +31,20 @@ namespace GDMCHttp.Data.Position
                 return new Vec3Int(Math.Abs(offset.X), Math.Abs(offset.Y), Math.Abs(offset.Z));
             }
         }
+        public Vec3Int CentreOffset
+        {
+            get
+            {
+                return (OffsetBToA / 2);
+            }
+        }
+        public Vec3Int Centre
+        {
+            get
+            {
+                return CornerA + CentreOffset;
+            }
+        }
 
         public int Volume
         {
@@ -38,6 +53,11 @@ namespace GDMCHttp.Data.Position
                 Vec3Int size = Size;
                 return size.X * size.Y * size.Z;
             }
+        }
+
+        public Area() : this(Vec3Int.Zero, Vec3Int.Zero)
+        {
+
         }
 
         public Area(Vec3Int cornerA, Vec3Int cornerB)

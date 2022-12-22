@@ -1,6 +1,7 @@
 ﻿using GDMCHttp.Commands;
 using GDMCHttp.Data;
 using GDMCHttp.Data.Blocks;
+using GDMCHttp.Data.Blocks.Structures;
 using GDMCHttp.Data.Position;
 using System;
 using System.Net;
@@ -14,6 +15,7 @@ namespace GDMCHttp
         private static string biomeEndpoint = "/biomes";
         private static string commandsEndpoint = "/command";
         private static string buildAreaEndpoint = "/buildarea";
+        private static string structureEndpoint = "/structure";
         private Uri root;
 
         /// <summary>
@@ -51,6 +53,14 @@ namespace GDMCHttp
             get
             {
                 return new Uri(root, buildAreaEndpoint);
+            }
+        }
+
+        private Uri StructureEndpoint
+        {
+            get
+            {
+                return new Uri(root, structureEndpoint);
             }
         }
 
@@ -175,6 +185,47 @@ namespace GDMCHttp
         public BiomePoint GetBiomeSync(Vec3Int position)
         {
             return GetBiomesSync(position, new Vec3Int(1, 1, 1))[0];
+        }
+
+        public Structure GetStructureSync(Vec3Int position, Vec3Int offset, bool entities = false)
+        {
+            using (WebClient webClient = new WebClient())
+            {
+                string query = "?" + FormatPositionQuery(position);
+                query += "&" + FormatPositionQuery(offset, true);
+                if(entities)
+                {
+                    query += "&entities=true";
+                }
+                byte[] result = webClient.DownloadData(new Uri(StructureEndpoint.AbsoluteUri + query));
+                return new Structure(new Area(position, position + offset), result);
+            }
+        }
+
+        public void SetStructureSync(Structure structure)
+        {
+            using (WebClient webClient = new WebClient())
+            {
+                string query = "?" + FormatPositionQuery(Vec3Int.MergeToMin(structure.Position.CornerA, structure.Position.CornerB));
+                if(structure.Entities)
+                {
+                    query += "&entities=true";
+                }
+                if (structure.Rotation != Rotation.None)
+                {
+                    query += $"&rotate={(int)structure.Rotation}";
+                }
+                if (structure.Pivot != Vec3Int.Zero)
+                {
+                    Vec3Int pivot = structure.Pivot;
+                    query += $"&pivotx={pivot.X}&pivoty={pivot.Y}&pivotz={pivot.Z}";
+                }
+                if(structure.Mirror != Mirror.None)
+                {
+                    query += $"&mirror={structure.Mirror.ToString()}";
+                }
+                webClient.UploadData(new Uri(StructureEndpoint.AbsoluteUri + query), structure.Data);
+            }
         }
 
         /// <summary>

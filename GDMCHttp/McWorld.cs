@@ -1,5 +1,6 @@
 ﻿using GDMCHttp.Data;
 using GDMCHttp.Data.Blocks;
+using GDMCHttp.Data.Blocks.Structures;
 using GDMCHttp.Data.Position;
 using System;
 using System.Collections.Generic;
@@ -334,6 +335,28 @@ namespace GDMCHttp
                 if (!biomes.Contains(biomeCache[i].Biome)) biomes.Add(biomeCache[i].Biome);
             }
             return biomes.ToArray();
+        }
+
+        /// <summary>
+        /// Push structures into the world.
+        /// WARNING: This does not affect the cache and so it is strongly recommended to refresh
+        /// the cache afterwards otherwise subsequent GetBlock calls may be incorrect. As such it is also
+        /// recommended to batch structure placements so that cache refreshes are limited
+        /// </summary>
+        /// <param name="refreshCache">Should the cache be refreshed after sending all the structures?
+        /// If false, the cache will be out of sync with the remote</param>
+        /// <param name="structures"></param>
+        public void PushStructures(Structure[] structures, bool refreshCache = true)
+        {
+            for (int i = 0; i < structures.Length; i++)
+            {
+                Connection.SetStructureSync(structures[i]);
+            }
+
+            if (refreshCache)
+            {
+                RefreshCache();
+            }
         }
     }
 }

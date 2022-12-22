@@ -1,6 +1,7 @@
 ﻿using GDMCHttp;
 using GDMCHttp.Commands;
 using GDMCHttp.Data.Blocks;
+using GDMCHttp.Data.Blocks.Structures;
 using GDMCHttp.Data.Position;
 using GDMCHttp.Pathing;
 using System.Linq;
@@ -18,38 +19,25 @@ BlockName pathBlock = BlockName.stone_bricks;
 
 announce("Loading world cache");
 McWorld world = new McWorld(connection);
-announce("Cache loaded, tidying up from last time...");
-world.ReplaceBlock(pathBlock, BlockName.stone, false);
-world.Flush();
-announce("Tidied");
+announce("Cache loaded");
 
+announce("Loading structure");
+Structure hut = Structure.ReadFromXmlFile("./hut.xml");
 
-announce("Calculating paths");
+hut.MoveTo(world.BuildArea.CornerA);
 
-System.Diagnostics.Stopwatch sw = new System.Diagnostics.Stopwatch();
-
-sw.Start();
-Block[] paths = GDMCHttp.Pathing.Path.PathJoin(world, (Block b) =>
+int hutCount = 5;
+Structure[] huts = new Structure[hutCount];
+Vec3Int offset = new Vec3Int(0, 0, 15);
+for (int i = 0; i < hutCount; i++)
 {
-    bool isDoor = b.Name == BlockName.oak_door && b.BlockProperties.Properties[BlockProperty.half] != "upper";
+    Vec3Int hutOffset =  offset * (i + 1);
+    huts[i] = new Structure(hut);
+    huts[i].Translate(hutOffset);
+}
 
-    // Debug stuff here, to be able to know what are blocks below doors
-    if (isDoor)
-    {
-        Block below = world.GetBlock(b.Position + new Vec3Int(0, -1, 0));
-        if (below != null)
-        {
-            world.ReplaceBlock(below, new Block(BlockName.copper_block, below.Position));
-        }
-    }
+world.PushStructures(huts, true);
 
-    return isDoor;
-}, false, false);
-sw.Stop();
-
-announce($"Paths calculated ({paths.Length} blocks, in {sw.Elapsed}), updating world");
-world.ReplaceBlocks(paths, pathBlock);
-announce("Flushing");
 world.Flush();
 
 
