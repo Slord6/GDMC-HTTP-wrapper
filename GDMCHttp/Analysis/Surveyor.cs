@@ -110,16 +110,33 @@ namespace GDMCHttp.Analysis
         /// <returns>Plots that might be good candidates for building</returns>
         public Block[][] BuildablePlots()
         {
-            List<Block> flatBlocks = new List<Block>(FlatAreaBlocks());
-            List<List<Block>> visited = new List<List<Block>>();
-            Block[,] heightmap = HeightmapNoPlants();
+            return ContiguousBlocks(FlatAreaBlocks().ToList());
+        }
 
-            while(flatBlocks.Count > 0)
+        /// <summary>
+        /// Get all caves in the area
+        /// </summary>
+        /// <returns>Array of caves containing all the air in each cave</returns>
+        public Block[][] Caves()
+        {
+            return ContiguousBlocks(world.GetBlocks(BlockName.cave_air).ToList());
+        }
+
+        /// <summary>
+        /// Given a selection of blocks, group them spacially
+        /// </summary>
+        /// <param name="selection">The blocks to group</param>
+        /// <returns>The groups of groups of touching blocks</returns>
+        public Block[][] ContiguousBlocks(List<Block> selection)
+        {
+            List<List<Block>> visited = new List<List<Block>>();
+
+            while (selection.Count > 0)
             {
                 // Get next unvisited block
-                Block current = flatBlocks.First();
+                Block current = selection.First();
 
-                List<Block> plot = new List<Block>();
+                List<Block> group = new List<Block>();
                 List<Block> neighbours = new List<Block>();
                 neighbours.Add(current);
                 do
@@ -128,20 +145,25 @@ namespace GDMCHttp.Analysis
                     Block neighbour = neighbours.FirstOrDefault();
                     // ~Pop from neighbours list and flatBlocks so we don't revisit
                     neighbours.Remove(neighbour);
-                    flatBlocks.Remove(neighbour);
-                    // Add this neighbour to the current plot
-                    plot.Add(neighbour);
+                    selection.Remove(neighbour);
+                    
+                    if (neighbour == null) continue;
+
+                    // Add this neighbour to the current group
+                    if (!group.Contains(neighbour))
+                    {
+                        group.Add(neighbour);
+                    }
                     // Add any of their neighbours that we still want to visit
-                    // and filter non-flat blocks as a byproduct
-                    neighbours.AddRange(
-                        world.GetNeighbours(current)
-                        .Where(n => n != null)
-                        .Where(n => flatBlocks.Contains(n)).ToList()
-                    );
+                    // and filter unwanted blocks as a byproduct
+                    IEnumerable<Block> surrounding = world.GetNeighbours(neighbour).Where(n => n != null);
+                    IEnumerable<Block> toVisit = surrounding
+                        .Where(n => selection.Contains(n) && !group.Contains(n) && !neighbours.Contains(n));
+                    neighbours.AddRange(toVisit);
                 } while (neighbours.Count > 0);
 
                 // We exhausted that plot, so store and start over
-                visited.Add(plot);
+                visited.Add(group);
             }
 
             return visited.Select(x => x.ToArray()).ToArray();
