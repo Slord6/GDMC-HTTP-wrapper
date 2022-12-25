@@ -199,6 +199,22 @@ namespace GDMCHttp.Analysis
         }
 
         /// <summary>
+        /// Count the types of block available in the cache
+        /// </summary>
+        /// <returns>Dictionary of count of each block type</returns>
+        public Dictionary<BlockName, int> AvailableResources()
+        {
+            Block[] allBlocks = world.GetBlocks();
+            Dictionary<BlockName, int> availableResources = new Dictionary<BlockName, int>();
+            for (int i = 0; i < allBlocks.Length; i++)
+            {
+                if (!availableResources.ContainsKey(allBlocks[i].Name)) availableResources.Add(allBlocks[i].Name, 0);
+                availableResources[allBlocks[i].Name]++;
+            }
+            return availableResources;
+        }
+
+        /// <summary>
         /// Visualisation function that paints the world heighmap based on the slope near each block
         /// </summary>
         public void PaintHeightLandscape()
