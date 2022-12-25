@@ -119,7 +119,24 @@ namespace GDMCHttp.Analysis
         /// <returns>Array of caves containing all the air in each cave</returns>
         public Block[][] Caves()
         {
-            return ContiguousBlocks(world.GetBlocks(BlockName.cave_air).ToList());
+            List<Block> caveBlocks = new List<Block>();
+            Block[] caveAir = world.GetBlocks(BlockName.cave_air);
+            caveBlocks.AddRange(caveAir);
+            Block[,] heightmap = HeightmapNoPlants();
+            Vec3Int worldMinCorner = Vec3Int.MergeToMin(world.BuildArea.CornerA, world.BuildArea.CornerB);
+            Block[] enclosedAir = world.GetBlocks((Block b) =>
+            {
+                // Only air blocks can be a cave
+                if (!BlockCategories.IsAirBlock(b.Name)) return false;
+                Vec3Int buildAreaOffset = b.Position - worldMinCorner;
+                Block heightmapBlock = heightmap[buildAreaOffset.X, buildAreaOffset.Z];
+                if (heightmapBlock == null) return false;
+                // If this is an air block below the heightmap height then must be a cave
+                return heightmapBlock.Position.Y > b.Position.Y;
+            });
+            caveBlocks.AddRange(enclosedAir);
+
+            return ContiguousBlocks(caveBlocks.Distinct().ToList());
         }
 
         /// <summary>

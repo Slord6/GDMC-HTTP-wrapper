@@ -15,8 +15,6 @@ Func<string, string> announce = (string msg) =>
 
 announce("Client connected");
 
-BlockName pathBlock = BlockName.stone_bricks;
-
 announce("Loading world cache");
 McWorld world = new McWorld(connection);
 announce("Cache loaded");
@@ -28,14 +26,13 @@ surveyor.PaintHeightLandscape();
 world.Flush();
 announce("Painted.");
 
-announce("Selecting good plots");
-Block[][] plots = surveyor.BuildablePlots();
+announce("Selecting caves");
+Block[][] plots = surveyor.Caves();
 
 for (int i = 0; i < plots.Length; i++)
 {
-    world.ReplaceBlocks(plots[i], BlockName.lapis_block);
+    world.ReplaceBlocks(plots[i], BlockName.glass);
 }
-
 world.Flush();
 
 announce("Client done");

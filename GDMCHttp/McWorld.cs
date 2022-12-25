@@ -4,7 +4,7 @@ using GDMCHttp.Data.Blocks.Structures;
 using GDMCHttp.Data.Position;
 using System;
 using System.Collections.Generic;
-using System.Text;
+using System.Linq;
 
 namespace GDMCHttp
 {
@@ -206,6 +206,16 @@ namespace GDMCHttp
         public Block[] GetBlocks()
         {
             return new List<Block>(blockCache).ToArray();
+        }
+
+        /// <summary>
+        /// Get any blocks in the cache passing the filter
+        /// </summary>
+        /// <param name="filter">Function that returns true if the given block should pass the filter</param>
+        /// <returns>Filtered blocks</returns>
+        public Block[] GetBlocks(Func<Block, bool> filter)
+        {
+            return blockCache.Where(b => filter(b)).ToArray();
         }
 
         /// <summary>
