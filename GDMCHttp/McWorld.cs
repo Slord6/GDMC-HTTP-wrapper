@@ -292,21 +292,6 @@ namespace GDMCHttp
         }
 
         /// <summary>
-        /// Count the types of block available in the cache
-        /// </summary>
-        /// <returns>Dictionary of count of each block type</returns>
-        public Dictionary<BlockName, int> AvailableResources()
-        {
-            Dictionary<BlockName, int> availableResources = new Dictionary<BlockName, int>();
-            for (int i = 0; i < blockCache.Length; i++)
-            {
-                if (!availableResources.ContainsKey(blockCache[i].Name)) availableResources.Add(blockCache[i].Name, 0);
-                availableResources[blockCache[i].Name]++;
-            }
-            return availableResources;
-        }
-
-        /// <summary>
         /// Search the local biome cache to find all biomes in the buildarea
         /// </summary>
         /// <returns>The biomes in the build area</returns>
@@ -340,6 +325,15 @@ namespace GDMCHttp
             {
                 RefreshCache();
             }
+        }
+
+        /// <summary>
+        /// Export the world area (not the cache) as a structure
+        /// </summary>
+        /// <returns>A new structure</returns>
+        public Structure ToStructure()
+        {
+            return Connection.GetStructureSync(BuildArea.CornerA, BuildArea.OffsetAToB);
         }
 
 
