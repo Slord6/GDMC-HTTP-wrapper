@@ -226,6 +226,29 @@ namespace GDMCHttp.Data.Position
             }
         }
 
+        private static int Median(int[] values)
+        {
+            List<int> sorted = new List<int>(values);
+            sorted.Sort();
+            return sorted[sorted.Count / 2];
+        }
+
+        public static Vec3Int MedianPosition(Vec3Int[] positions)
+        {
+            int[] xVals = new int[positions.Length];
+            int[] yVals = new int[positions.Length];
+            int[] zVals = new int[positions.Length];
+            for (int i = 0; i < positions.Length; i++)
+            {
+                Vec3Int pos = positions[i];
+                xVals[i] = pos.X;
+                yVals[i] = pos.Y;
+                zVals[i] = pos.Z;
+            }
+
+            return new Vec3Int(Median(xVals), Median(yVals), Median(zVals));
+        }
+
         public static Vec3Int Parse(string value)
         {
             Vec3Int position;

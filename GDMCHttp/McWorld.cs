@@ -48,8 +48,8 @@ namespace GDMCHttp
         public void RefreshCache()
         {
             BuildArea = Connection.GetBuildAreaSync();
-            blockCache = Connection.GetBlocksSync(BuildArea.CornerA, BuildArea.OffsetAToB);
-            biomeCache = Connection.GetBiomesSync(BuildArea.CornerA, BuildArea.OffsetAToB);
+            blockCache = Connection.GetBlocksSync(BuildArea.MinCorner, BuildArea.OffsetMinToMax);
+            biomeCache = Connection.GetBiomesSync(BuildArea.MinCorner, BuildArea.OffsetMinToMax);
             changedBlocks = new List<Block>();
             blockPositionDict = null;
         }
@@ -279,7 +279,7 @@ namespace GDMCHttp
         public Block[,,] DimensionalRepresentation()
         {
             Vec3Int size = BuildArea.Size;
-            Vec3Int minCorner = Vec3Int.MergeToMin(BuildArea.CornerA, BuildArea.CornerB);
+            Vec3Int minCorner = Vec3Int.MergeToMin(BuildArea.MinCorner, BuildArea.MaxCorner);
             Block[,,] dimensional = new Block[size.X, size.Y, size.Z];
             for (int i = 0; i < blockCache.Length; i++)
             {
@@ -314,10 +314,15 @@ namespace GDMCHttp
         /// <param name="refreshCache">Should the cache be refreshed after sending all the structures?
         /// If false, the cache will be out of sync with the remote</param>
         /// <param name="structures"></param>
-        public void PushStructures(Structure[] structures, bool refreshCache = true)
+        public void PushStructures(Structure[] structures, bool refreshCache = true, bool checkPosition = true)
         {
             for (int i = 0; i < structures.Length; i++)
             {
+                if (checkPosition && !BuildArea.Contains(structures[i].Position))
+                {
+                    Console.WriteLine("Failed to place, out of zone");
+                    continue;
+                }
                 Connection.SetStructureSync(structures[i]);
             }
 
@@ -333,7 +338,7 @@ namespace GDMCHttp
         /// <returns>A new structure</returns>
         public Structure ToStructure()
         {
-            return Connection.GetStructureSync(BuildArea.CornerA, BuildArea.OffsetAToB);
+            return Connection.GetStructureSync(BuildArea.MinCorner, BuildArea.OffsetMinToMax);
         }
 
 
@@ -341,10 +346,12 @@ namespace GDMCHttp
         /// Restore the remote world to as it was when this instance was created
         /// Pushes the entire original cache and then refreshes
         /// </summary>
-        public void Restore()
+        public void Restore(bool refreshCache = true)
         {
             Connection.SetBlocksSync(originalState);
+            if(refreshCache) {
             RefreshCache();
+                }
         }
     }
 }

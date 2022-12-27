@@ -206,7 +206,7 @@ namespace GDMCHttp
         {
             using (WebClient webClient = new WebClient())
             {
-                string query = "?" + FormatPositionQuery(Vec3Int.MergeToMin(structure.Position.CornerA, structure.Position.CornerB));
+                string query = "?" + FormatPositionQuery(Vec3Int.MergeToMin(structure.Position.MinCorner, structure.Position.MaxCorner));
                 if(structure.Entities)
                 {
                     query += "&entities=true";

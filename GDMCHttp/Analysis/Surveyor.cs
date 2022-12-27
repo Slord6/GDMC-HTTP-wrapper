@@ -123,7 +123,7 @@ namespace GDMCHttp.Analysis
             Block[] caveAir = world.GetBlocks(BlockName.cave_air);
             caveBlocks.AddRange(caveAir);
             Block[,] heightmap = HeightmapNoPlants();
-            Vec3Int worldMinCorner = Vec3Int.MergeToMin(world.BuildArea.CornerA, world.BuildArea.CornerB);
+            Vec3Int worldMinCorner = Vec3Int.MergeToMin(world.BuildArea.MinCorner, world.BuildArea.MaxCorner);
             Block[] enclosedAir = world.GetBlocks((Block b) =>
             {
                 // Only air blocks can be a cave
@@ -216,6 +216,7 @@ namespace GDMCHttp.Analysis
 
         /// <summary>
         /// Visualisation function that paints the world heighmap based on the slope near each block
+        /// Paints to cache and does not flush
         /// </summary>
         public void PaintHeightLandscape()
         {

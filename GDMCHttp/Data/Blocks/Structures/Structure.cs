@@ -83,8 +83,8 @@ namespace GDMCHttp.Data.Blocks.Structures
         {
             UpdatePosition(
                 new Area(
-                    Position.CornerA + offset,
-                    Position.CornerB + offset
+                    Position.MinCorner + offset,
+                    Position.MaxCorner + offset
                 ),
                 updatePivotToCenter
             );
@@ -92,8 +92,10 @@ namespace GDMCHttp.Data.Blocks.Structures
 
         public void MoveTo(Vec3Int position, bool updatePivotToCenter = true)
         {
-            Vec3Int offset = position - Position.Centre;
-            //int baseHeightOffset = 0 - ((Position.Size.Y + 1) / 2);
+            Vec3Int offset = position - Position.MinCorner;
+            Vec3Int centeringOffset = (Position.Size / 2);
+            centeringOffset.Y = 0;
+            offset -= centeringOffset;
             offset.Y += MovementYOffset;
 
             Translate(offset, updatePivotToCenter);

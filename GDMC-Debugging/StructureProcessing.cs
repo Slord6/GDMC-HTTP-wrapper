@@ -53,7 +53,7 @@ namespace GDMC_Debugging
             }
         }
 
-        private void PlaceAllStructures(string dirPath = "./")
+        public Structure[] LoadAllStructures(string dirPath = "./")
         {
             IEnumerable<string> structureFilepaths = Directory.EnumerateFiles(dirPath, "*.xml");
             List<Structure> structures = new List<Structure>(structureFilepaths.Count());
@@ -61,12 +61,17 @@ namespace GDMC_Debugging
             {
                 structures.Add(Structure.ReadFromXmlFile(filepath));
             }
+            return structures.ToArray();
+        }
 
+        public void PlaceAllStructures(string dirPath = "./")
+        {
+            Structure[] structures = LoadAllStructures(dirPath);
 
             McWorld world = new McWorld(connection);
             Vec3Int offset = Vec3Int.Zero;
             Vec3Int movement = new Vec3Int(30, 0, 0);
-            Vec3Int root = Vec3Int.MergeToMin(world.BuildArea.CornerA, world.BuildArea.CornerB);
+            Vec3Int root = Vec3Int.MergeToMin(world.BuildArea.MinCorner, world.BuildArea.MaxCorner);
             int height = -61;
             root.Y = height;
             foreach (Structure structure in structures)
@@ -88,9 +93,9 @@ namespace GDMC_Debugging
             return res.StartsWith("Y");
         }
 
-        public void PrepareStructuresInteractive()
+        public void PrepareStructuresInteractive(string dirPath = "./")
         {
-            List<string> structureFilepaths = Directory.EnumerateFiles("./", "*.xml").ToList();
+            List<string> structureFilepaths = Directory.EnumerateFiles(dirPath, "*.xml").ToList();
             List<Structure> structures = new List<Structure>(structureFilepaths.Count());
             foreach (string filepath in structureFilepaths)
             {
@@ -100,14 +105,21 @@ namespace GDMC_Debugging
 
 
             McWorld world = new McWorld(connection);
-            world.ReplaceBlocks(world.GetBlocks(BlockName.grass_block), BlockName.gold_block);
-            world.RefreshCache();
+            world.ReplaceBlock(BlockName.grass_block, BlockName.gold_block, false);
+            world.Flush();
 
             int index = 0;
             foreach (Structure structure in structures)
             {
-                Vec3Int min = Vec3Int.MergeToMin(structure.Position.CornerA, structure.Position.CornerB);
-                Vec3Int max = Vec3Int.MergeToMax(structure.Position.CornerA, structure.Position.CornerB);
+                Vec3Int min = Vec3Int.MergeToMin(structure.Position.MinCorner, structure.Position.MaxCorner);
+                Vec3Int max = Vec3Int.MergeToMax(structure.Position.MinCorner, structure.Position.MaxCorner);
+
+                if(min == max)
+                {
+                    Announce("WARNING: ZERO SIZED STRUCTURE");
+                    if (!IsOk("Continue?")) return;
+                }
+
                 structure.UpdatePosition(new Area(min, max));
 
                 Announce(structureFilepaths[index]);
@@ -119,7 +131,7 @@ namespace GDMC_Debugging
                 world.Flush();
 
                 structure.MoveTo(centre);
-                world.PushStructures(new Structure[] { structure });
+                world.PushStructures(new Structure[] { structure }, checkPosition: false);
 
                 while (!IsOk("Is structure pointing North (or rotation is unimportant)?"))
                 {
@@ -144,7 +156,7 @@ namespace GDMC_Debugging
                     world.Restore();
                     structure.MovementYOffset = change;
                     structure.MoveTo(centre);
-                    world.PushStructures(new Structure[] { structure });
+                    world.PushStructures(new Structure[] { structure }, checkPosition: false);
                 }
 
                 structure.WriteToXmlFile(structureFilepaths[index]);

@@ -7,27 +7,27 @@ namespace GDMCHttp.Data.Position
     [Serializable]
     public class Area
     {
-        public Vec3Int CornerA { get; set; }
-        public Vec3Int CornerB { get; set; }
-        public Vec3Int OffsetAToB
+        public Vec3Int MinCorner { get; set; }
+        public Vec3Int MaxCorner { get; set; }
+        public Vec3Int OffsetMinToMax
         {
             get
             {
-                return CornerB - CornerA;
+                return MaxCorner - MinCorner;
             }
         }
-        public Vec3Int OffsetBToA
+        public Vec3Int OffsetMaxToMin
         {
             get
             {
-                return CornerA - CornerB;
+                return MinCorner - MaxCorner;
             }
         }
         public Vec3Int Size
         {
             get
             {
-                Vec3Int offset = OffsetAToB;
+                Vec3Int offset = OffsetMinToMax;
                 return new Vec3Int(Math.Abs(offset.X), Math.Abs(offset.Y), Math.Abs(offset.Z));
             }
         }
@@ -35,23 +35,30 @@ namespace GDMCHttp.Data.Position
         {
             get
             {
-                return (OffsetAToB / 2);
+                return (OffsetMinToMax / 2);
             }
         }
         public Vec3Int Centre
         {
             get
             {
-                return CornerA + CentreOffset;
+                return MinCorner + CentreOffset;
             }
         }
-
         public int Volume
         {
             get
             {
                 Vec3Int size = Size;
-                return size.X * size.Y * size.Z;
+                return FootprintSize * size.Y;
+            }
+        }
+        public int FootprintSize
+        {
+            get
+            {
+                Vec3Int size = Size;
+                return size.X * size.Z;
             }
         }
 
@@ -62,8 +69,20 @@ namespace GDMCHttp.Data.Position
 
         public Area(Vec3Int cornerA, Vec3Int cornerB)
         {
-            CornerA = Vec3Int.MergeToMin(cornerA, cornerB);
-            CornerB = Vec3Int.MergeToMax(cornerA, cornerB);
+            MinCorner = Vec3Int.MergeToMin(cornerA, cornerB);
+            MaxCorner = Vec3Int.MergeToMax(cornerA, cornerB);
+        }
+
+        public bool Contains(Vec3Int point)
+        {
+            return MinCorner.X <= point.X && point.X <= MaxCorner.X
+                && MinCorner.Y <= point.Y && point.Y <= MaxCorner.Y
+                && MinCorner.Z <= point.Z && point.Z <= MaxCorner.Z;
+        }
+
+        public bool Contains(Area other)
+        {
+            return Contains(other.MinCorner) && Contains(other.MaxCorner);
         }
 
         public bool CouldContain(Area other)
@@ -75,7 +94,7 @@ namespace GDMCHttp.Data.Position
 
         public override string ToString()
         {
-            return CornerA + "-->" + CornerB;
+            return MinCorner + "-->" + MaxCorner;
         }
     }
 }
