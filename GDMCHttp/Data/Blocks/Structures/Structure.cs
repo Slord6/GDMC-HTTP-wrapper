@@ -16,6 +16,7 @@ namespace GDMCHttp.Data.Blocks.Structures
         public bool Entities { get; set; }
         public Mirror Mirror { get; set; }
         public byte[] Data { get; set; }
+        public int MovementYOffset { get; set; }
 
         public Structure()
         {
@@ -25,6 +26,7 @@ namespace GDMCHttp.Data.Blocks.Structures
             Entities = false;
             Mirror = Mirror.None;
             Data = new byte[0];
+            MovementYOffset = 0;
         }
 
         public Structure(byte[] data) : this()
@@ -45,12 +47,12 @@ namespace GDMCHttp.Data.Blocks.Structures
         /// </summary>
         /// <param name="position">New position</param>
         /// <param name="existing">Existing structure to copy data from</param>
-        public Structure(Area position, Structure existing) : this(position, existing.Rotation, existing.Entities, existing.Mirror, existing.Data)
+        public Structure(Area position, Structure existing) : this(position, existing.Rotation, existing.Entities, existing.Mirror, existing.Data, null, existing.MovementYOffset)
         {
 
         }
 
-        public Structure(Area position, Rotation rotation, bool entities, Mirror mirror, byte[] data, Vec3Int pivot = null)
+        public Structure(Area position, Rotation rotation, bool entities, Mirror mirror, byte[] data, Vec3Int pivot = null, int movementYOffset = 0)
         {
             Rotation = rotation;
             if(pivot == null)
@@ -65,6 +67,7 @@ namespace GDMCHttp.Data.Blocks.Structures
             Entities = entities;
             Mirror = mirror;
             Data = data;
+            MovementYOffset = movementYOffset;
         }
 
         public void UpdatePosition(Area position, bool updatePivotToCenter = true)
@@ -89,7 +92,10 @@ namespace GDMCHttp.Data.Blocks.Structures
 
         public void MoveTo(Vec3Int position, bool updatePivotToCenter = true)
         {
-            Vec3Int offset = position - Position.CornerA;
+            Vec3Int offset = position - Position.Centre;
+            //int baseHeightOffset = 0 - ((Position.Size.Y + 1) / 2);
+            offset.Y += MovementYOffset;
+
             Translate(offset, updatePivotToCenter);
         }
 

@@ -13,14 +13,14 @@ namespace GDMCHttp.Data.Position
         {
             get
             {
-                return Vec3Int.Sub(CornerB, CornerA);
+                return CornerB - CornerA;
             }
         }
         public Vec3Int OffsetBToA
         {
             get
             {
-                return Vec3Int.Sub(CornerA, CornerB);
+                return CornerA - CornerB;
             }
         }
         public Vec3Int Size
@@ -35,7 +35,7 @@ namespace GDMCHttp.Data.Position
         {
             get
             {
-                return (OffsetBToA / 2);
+                return (OffsetAToB / 2);
             }
         }
         public Vec3Int Centre
@@ -62,8 +62,8 @@ namespace GDMCHttp.Data.Position
 
         public Area(Vec3Int cornerA, Vec3Int cornerB)
         {
-            CornerA = cornerA;
-            CornerB = cornerB;
+            CornerA = Vec3Int.MergeToMin(cornerA, cornerB);
+            CornerB = Vec3Int.MergeToMax(cornerA, cornerB);
         }
 
         public bool CouldContain(Area other)
