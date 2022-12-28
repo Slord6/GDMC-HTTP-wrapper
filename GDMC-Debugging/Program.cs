@@ -14,7 +14,7 @@ announce("Client connected");
 connection.SendCommandSync(new Weather(WeatherType.Rain));
 
 McWorld world = new McWorld(connection);
-new PlaceStructuresBySizeDemo(@"D:\samlo\Documents\GDMC structures").Run(world);
+new PathingDemo().Run(world);
 
 // Make clear afterwards
 connection.SendCommandSync(new Weather(WeatherType.Clear));

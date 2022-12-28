@@ -64,6 +64,7 @@ namespace GDMCHttp.Analysis.Pathing
 
         private bool IsWalkableBlock(Block block, McWorld world)
         {
+            if (block == null) return false;
             bool isSolid = BlockCategories.IsSolidBlock(block.Name);
             if (!isSolid) return false;
 
@@ -79,6 +80,12 @@ namespace GDMCHttp.Analysis.Pathing
                 {
                     walkableAbove = true;
                     break;
+                }
+                else if(above.Name == BlockName.snow)
+                {
+                    int layerCount = int.Parse(above.BlockProperties.Properties[BlockProperty.layers]);
+                    walkableAbove = layerCount <= 3;
+                    if (!walkableAbove) break;
                 }
                 else if (!BlockCategories.IsAirBlock(above.Name)
                     && !BlockCategories.IsDoorBlock(above.Name)

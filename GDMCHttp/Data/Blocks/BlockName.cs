@@ -946,6 +946,7 @@ namespace GDMCHttp.Data.Blocks
         private static HashSet<BlockName> groundBlocks;
         private static BlockName[] allBlockNames;
         private static HashSet<BlockName> plantBlocks;
+        private static BlockName[] solidBlockNames;
 
         private static HashSet<BlockName> GroundBlocks
         {
@@ -982,8 +983,10 @@ namespace GDMCHttp.Data.Blocks
         {
             get
             {
-                return new BlockName[]
+                if (solidBlockNames == null)
                 {
+                    solidBlockNames = new BlockName[]
+                    {
                     BlockName.stone,
                     BlockName.granite,
                     BlockName.polished_granite,
@@ -1704,7 +1707,9 @@ namespace GDMCHttp.Data.Blocks
                     BlockName.green_candle_cake,
                     BlockName.red_candle_cake,
                     BlockName.black_candle_cake
-                };
+                    };
+                }
+                return solidBlockNames;
             }
         }
 
