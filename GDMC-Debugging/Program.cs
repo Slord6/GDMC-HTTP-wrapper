@@ -1,11 +1,6 @@
 ﻿using GDMCHttp;
 using GDMCHttp.Commands;
-using GDMCHttp.Data.Blocks;
-using GDMCHttp.Data.Blocks.Structures;
-using GDMCHttp.Data.Position;
-using GDMCHttp.Analysis;
-using System.Linq;
-using GDMC_Debugging;
+using GDMC_Debugging.Demos;
 
 Connection connection = new Connection();
 Func<string, string> announce = (string msg) =>
@@ -15,15 +10,16 @@ Func<string, string> announce = (string msg) =>
 };
 
 announce("Client connected");
+// Start rain, so in snowy biomes structures will have some snow on them
+connection.SendCommandSync(new Weather(WeatherType.Rain));
 
-StructureProcessing structureProcessing = new StructureProcessing(connection);
+McWorld world = new McWorld(connection);
+new PlaceStructuresBySizeDemo(@"D:\samlo\Documents\GDMC structures").Run(world);
 
-structureProcessing.ExportStructuresInteractive();
-//structureProcessing.PrepareStructuresInteractive();
-
-
+// Make clear afterwards
+connection.SendCommandSync(new Weather(WeatherType.Clear));
 announce("Client done");
 
-//announce("Restoring...");
-//world.Restore();
-//announce("Restored");
+announce("Restoring...");
+world.Restore(false);
+announce("Restored");
