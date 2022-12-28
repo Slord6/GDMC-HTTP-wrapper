@@ -28,7 +28,12 @@ namespace GDMCHttp.Data.Position
             get
             {
                 Vec3Int offset = OffsetMinToMax;
-                return new Vec3Int(Math.Abs(offset.X), Math.Abs(offset.Y), Math.Abs(offset.Z));
+                // offset doesn't include the min corner, so we add one to all for the size
+                return new Vec3Int(
+                    Math.Abs(offset.X) + 1,
+                    Math.Abs(offset.Y) + 1,
+                    Math.Abs(offset.Z) + 1
+                );
             }
         }
         public Vec3Int CentreOffset

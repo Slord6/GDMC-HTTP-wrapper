@@ -4,6 +4,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 using System;
+using GDMCHttp.Data.Blocks.Structures;
 
 namespace GDMCHttp.Analysis
 {
@@ -65,7 +66,7 @@ namespace GDMCHttp.Analysis
             {
                 for (int z = 0; z < areaSize.Z; z++)
                 {
-                    if (heightmap[x,z] == null)
+                    if (heightmap[x, z] == null)
                     {
                         averageHeights[x, z] = 0;
                         continue;
@@ -74,7 +75,7 @@ namespace GDMCHttp.Analysis
                     IEnumerable<Block> neighbours = LateralNeighbours(heightmap, x, z).Where(n => n != null);
                     double totalHeight = neighbours.Select(block => block.Position.Y).Sum();
                     double localAverage = totalHeight / neighbours.Count();
-                    averageHeights[x, z] = localAverage - heightmap[x,z].Position.Y;
+                    averageHeights[x, z] = localAverage - heightmap[x, z].Position.Y;
                 }
             }
             return averageHeights;
@@ -95,7 +96,7 @@ namespace GDMCHttp.Analysis
             {
                 for (int z = 0; z < areaSize.Z; z++)
                 {
-                    if (heights[x,z] >= 0 && heights[x,z] < 0.2 && heightmap[x,z] != null)
+                    if (heights[x, z] >= 0 && heights[x, z] < 0.2 && heightmap[x, z] != null)
                     {
                         flatAreaBlocks.Add(heightmap[x, z]);
                     }
@@ -163,7 +164,7 @@ namespace GDMCHttp.Analysis
                     // ~Pop from neighbours list and flatBlocks so we don't revisit
                     neighbours.Remove(neighbour);
                     selection.Remove(neighbour);
-                    
+
                     if (neighbour == null) continue;
 
                     // Add this neighbour to the current group
@@ -273,7 +274,7 @@ namespace GDMCHttp.Analysis
             List<Block> neighbours = new List<Block>();
             for (int currX = x - 1; currX <= x + 1; currX++)
             {
-                for(int currZ = z - 1; currZ <= z + 1; currZ++)
+                for (int currZ = z - 1; currZ <= z + 1; currZ++)
                 {
                     if (!IsInBounds(currX, currZ, heightmap)) continue;
                     neighbours.Add(heightmap[currX, currZ]);
@@ -289,8 +290,9 @@ namespace GDMCHttp.Analysis
         /// <param name="z">1st dimension value</param>
         /// <param name="arr">The array to check</param>
         /// <returns>True if the x,z pair fall within the bounds of the array</returns>
-        private bool IsInBounds(int x, int z, object[,] arr) {
-            if(x < 0 || z < 0) return false;
+        private bool IsInBounds(int x, int z, object[,] arr)
+        {
+            if (x < 0 || z < 0) return false;
             if (x >= arr.GetLength(0) || z >= arr.GetLength(1)) return false;
 
             return true;
@@ -306,6 +308,22 @@ namespace GDMCHttp.Analysis
             Block above = world.GetBlock(block.Position + new Vec3Int(0, 1, 0));
             if (above == null) return false;
             return above.Name == BlockName.water;
+        }
+
+        public Structure ClosestSize(int areaSize, Structure[] structures)
+        {
+            int minDiff = int.MaxValue;
+            Structure chosen = null;
+            for (int i = 0; i < structures.Length; i++)
+            {
+                int diff = Math.Abs(structures[i].Position.FootprintSize - areaSize);
+                if (diff < minDiff)
+                {
+                    minDiff = diff;
+                    chosen = structures[i];
+                }
+            }
+            return chosen;
         }
     }
 }

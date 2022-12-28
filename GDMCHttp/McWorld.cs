@@ -48,8 +48,8 @@ namespace GDMCHttp
         public void RefreshCache()
         {
             BuildArea = Connection.GetBuildAreaSync();
-            blockCache = Connection.GetBlocksSync(BuildArea.MinCorner, BuildArea.OffsetMinToMax);
-            biomeCache = Connection.GetBiomesSync(BuildArea.MinCorner, BuildArea.OffsetMinToMax);
+            blockCache = Connection.GetBlocksSync(BuildArea.MinCorner, BuildArea.Size);
+            biomeCache = Connection.GetBiomesSync(BuildArea.MinCorner, BuildArea.Size);
             changedBlocks = new List<Block>();
             blockPositionDict = null;
         }
@@ -338,7 +338,7 @@ namespace GDMCHttp
         /// <returns>A new structure</returns>
         public Structure ToStructure()
         {
-            return Connection.GetStructureSync(BuildArea.MinCorner, BuildArea.OffsetMinToMax);
+            return Connection.GetStructureSync(BuildArea.MinCorner, BuildArea.Size);
         }
 
 

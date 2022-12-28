@@ -26,7 +26,7 @@ namespace GDMC_Debugging
             return connection.SendCommandSync(new Say(msg));
         }
 
-        public void ExportStructuresInteractive()
+        public void ExportStructuresInteractive(string dir = ".")
         {
             while (true)
             {
@@ -46,7 +46,7 @@ namespace GDMC_Debugging
 #pragma warning restore CS8600 // Converting null literal or possible null value to non-nullable type.
 
                 Announce("Exporting...");
-                structure.WriteToXmlFile("./" + name + ".xml");
+                structure.WriteToXmlFile(dir + "/" + name + ".xml");
                 Announce("Exported");
 
                 Console.WriteLine();
@@ -108,6 +108,9 @@ namespace GDMC_Debugging
             world.ReplaceBlock(BlockName.grass_block, BlockName.gold_block, false);
             world.Flush();
 
+            Console.WriteLine("What is ground level?");
+            int height = int.Parse(Console.ReadLine());
+
             int index = 0;
             foreach (Structure structure in structures)
             {
@@ -124,7 +127,6 @@ namespace GDMC_Debugging
 
                 Announce(structureFilepaths[index]);
                 Vec3Int centre = world.BuildArea.Centre;
-                int height = -61;
                 centre.Y = height;
                 Announce("Centre is " + centre);
                 world.ReplaceBlock(world.GetBlock(centre), new Block(BlockName.glass, centre));
@@ -148,7 +150,7 @@ namespace GDMC_Debugging
                 }
 
 
-                int change = 7;
+                int change = 3;
 
                 while (!IsOk("Is Structure flush with ground?"))
                 {
